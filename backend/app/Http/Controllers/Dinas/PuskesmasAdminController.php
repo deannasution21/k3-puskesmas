@@ -26,6 +26,10 @@ class PuskesmasAdminController extends Controller
             $puskesmas = Puskesmas::create([
                 'nama' => $data['nama'],
                 'alamat' => $data['alamat'] ?? null,
+                'kepala_puskesmas' => $data['kepala_puskesmas'] ?? null,
+                'no_hp' => $data['no_hp'] ?? null,
+                'email' => $data['email'] ?? null,
+                'kode_puskesmas' => $data['kode_puskesmas'] ?? null,
             ]);
 
             User::create([
@@ -48,6 +52,10 @@ class PuskesmasAdminController extends Controller
         $puskesmas->update([
             'nama' => $data['nama'],
             'alamat' => $data['alamat'] ?? null,
+            'kepala_puskesmas' => $data['kepala_puskesmas'] ?? null,
+            'no_hp' => $data['no_hp'] ?? null,
+            'email' => $data['email'] ?? null,
+            'kode_puskesmas' => $data['kode_puskesmas'] ?? null,
         ]);
 
         $puskesmas->user?->update(['username' => $data['username']]);

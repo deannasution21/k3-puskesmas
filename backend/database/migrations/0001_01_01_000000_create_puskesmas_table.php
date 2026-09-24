@@ -12,6 +12,10 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->text('alamat')->nullable();
+            $table->string('kepala_puskesmas')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('email')->nullable();
+            $table->string('kode_puskesmas')->nullable()->unique();
             $table->timestamps();
         });
     }

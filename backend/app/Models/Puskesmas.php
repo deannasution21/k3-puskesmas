@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['nama', 'alamat'])]
+#[Fillable(['nama', 'alamat', 'kepala_puskesmas', 'no_hp', 'email', 'kode_puskesmas'])]
 class Puskesmas extends Model
 {
     use HasFactory;

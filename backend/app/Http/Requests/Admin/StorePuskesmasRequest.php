@@ -16,6 +16,10 @@ class StorePuskesmasRequest extends FormRequest
         return [
             'nama' => ['required', 'string', 'max:255'],
             'alamat' => ['nullable', 'string'],
+            'kepala_puskesmas' => ['nullable', 'string', 'max:255'],
+            'no_hp' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'kode_puskesmas' => ['nullable', 'string', 'max:50', 'unique:puskesmas,kode_puskesmas'],
             'username' => ['required', 'string', 'max:255', 'alpha_dash', 'unique:users,username'],
             'password' => ['required', 'string', 'min:8'],
         ];

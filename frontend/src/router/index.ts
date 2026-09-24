@@ -95,6 +95,12 @@ const router = createRouter({
       meta: { role: 'dinas' },
     },
     {
+      path: '/dinas/rekap',
+      name: 'dinas.rekap',
+      component: () => import('../views/dinas/RecapView.vue'),
+      meta: { role: 'dinas' },
+    },
+    {
       path: '/',
       redirect: '/login',
     },

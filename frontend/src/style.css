@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand green, diturunkan dari logo Puskesmas (hijau tua hexagon/palang + hijau muda rumah) */
+  --color-brand-50: #f0faf2;
+  --color-brand-100: #dbf3e0;
+  --color-brand-200: #b8e6c3;
+  --color-brand-300: #87d19c;
+  --color-brand-400: #55b871;
+  --color-brand-500: #349d54;
+  --color-brand-600: #1f8143;
+  --color-brand-700: #1a6838;
+  --color-brand-800: #17542f;
+  --color-brand-900: #144529;
+
+  /* Hijau muda aksen, sesuai bentuk rumah pada logo */
+  --color-accent-400: #8bc34a;
+  --color-accent-500: #72b13a;
+  --color-accent-600: #5c9530;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
 body {
   margin: 0;
+  font-family: var(--font-sans);
 }

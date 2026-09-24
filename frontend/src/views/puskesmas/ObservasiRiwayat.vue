@@ -24,8 +24,8 @@ onMounted(async () => {
 <template>
   <div class="space-y-4">
     <div>
-      <h1 class="text-xl font-semibold text-gray-900">Riwayat Observasi</h1>
-      <RouterLink to="/puskesmas/observasi" class="text-sm text-blue-600 hover:underline">
+      <h1 class="text-xl font-bold text-gray-900">Riwayat Observasi</h1>
+      <RouterLink to="/puskesmas/observasi" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline mt-1">
         &larr; Kembali ke pengisian bulan ini
       </RouterLink>
     </div>
@@ -33,15 +33,15 @@ onMounted(async () => {
     <div v-if="loading" class="text-sm text-gray-400">Memuat...</div>
     <p v-else-if="submissions.length === 0" class="text-sm text-gray-400">Belum ada riwayat pengisian.</p>
 
-    <div v-else class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+    <div v-else class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
       <RouterLink
         v-for="s in submissions"
         :key="s.id"
         :to="`/puskesmas/observasi/riwayat/${periodeKey(s.periode_bulan, s.periode_tahun)}`"
-        class="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+        class="flex items-center justify-between px-4 py-3.5 hover:bg-brand-50 transition"
       >
-        <span class="text-sm text-gray-900">{{ formatPeriode(s.periode_bulan, s.periode_tahun) }}</span>
-        <span class="text-xs text-gray-400">{{ s.answers_count }}/96 terisi</span>
+        <span class="text-[15px] text-gray-900">{{ formatPeriode(s.periode_bulan, s.periode_tahun) }}</span>
+        <span class="text-sm text-gray-400">{{ s.answers_count }}/96 terisi</span>
       </RouterLink>
     </div>
   </div>

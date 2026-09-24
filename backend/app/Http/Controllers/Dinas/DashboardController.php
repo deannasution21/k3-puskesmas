@@ -13,10 +13,10 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function summary()
+    public function summary(Request $request)
     {
-        $bulan = Periode::bulanSekarang();
-        $tahun = Periode::tahunSekarang();
+        $bulan = (int) $request->query('bulan', Periode::bulanSekarang());
+        $tahun = (int) $request->query('tahun', Periode::tahunSekarang());
 
         $totalPuskesmas = Puskesmas::count();
 
@@ -52,6 +52,10 @@ class DashboardController extends Controller
             'id' => $p->id,
             'nama' => $p->nama,
             'alamat' => $p->alamat,
+            'kepala_puskesmas' => $p->kepala_puskesmas,
+            'no_hp' => $p->no_hp,
+            'email' => $p->email,
+            'kode_puskesmas' => $p->kode_puskesmas,
             'kuesioner_sudah_isi' => $questionnaireDone->has($p->id),
             'observasi_sudah_isi' => $observationDone->has($p->id),
         ]);

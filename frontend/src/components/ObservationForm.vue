@@ -61,20 +61,20 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <section v-for="[kode, group] in grouped" :key="kode" class="bg-white rounded-lg border border-gray-200">
-      <h2 class="px-4 py-3 border-b border-gray-200 font-medium text-sm text-gray-900">
+  <div class="space-y-5">
+    <section v-for="[kode, group] in grouped" :key="kode" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <h2 class="px-4 py-3 border-b border-gray-200 bg-brand-50 font-semibold text-sm text-brand-800">
         {{ kode }}. {{ group.kategori }}
       </h2>
       <ul class="divide-y divide-gray-100">
-        <li v-for="item in group.items" :key="item.id" class="px-4 py-3 space-y-2">
-          <p class="text-sm text-gray-700">{{ item.nomor }}. {{ item.item_teks }}</p>
+        <li v-for="item in group.items" :key="item.id" class="px-4 py-3.5 space-y-2.5">
+          <p class="text-[15px] text-gray-700">{{ item.nomor }}. {{ item.item_teks }}</p>
 
           <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
               :disabled="readonly"
-              class="px-3 py-1 text-xs rounded-md border"
+              class="px-4 py-2 text-sm font-medium rounded-lg border transition"
               :class="modelValue[item.id]?.ada === 'ada'
                 ? 'bg-green-600 text-white border-green-600'
                 : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
@@ -85,7 +85,7 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
             <button
               type="button"
               :disabled="readonly"
-              class="px-3 py-1 text-xs rounded-md border"
+              class="px-4 py-2 text-sm font-medium rounded-lg border transition"
               :class="modelValue[item.id]?.ada === 'tidak_ada'
                 ? 'bg-red-600 text-white border-red-600'
                 : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
@@ -96,7 +96,7 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
 
             <select
               v-if="modelValue[item.id]?.ada === 'ada'"
-              class="ml-2 text-xs border border-gray-300 rounded-md px-2 py-1 disabled:bg-gray-100"
+              class="ml-2 text-sm border border-gray-300 rounded-lg px-2.5 py-2 disabled:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
               :disabled="readonly"
               :value="modelValue[item.id]?.kondisi ?? ''"
               @change="patch(item.id, { kondisi: ($event.target as HTMLSelectElement).value || null })"
@@ -110,7 +110,7 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
             <input
               type="text"
               placeholder="Keterangan/temuan (opsional)"
-              class="flex-1 min-w-[160px] text-xs border border-gray-300 rounded-md px-2 py-1 disabled:bg-gray-100"
+              class="flex-1 min-w-[160px] text-sm border border-gray-300 rounded-lg px-2.5 py-2 disabled:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
               :disabled="readonly"
               :value="modelValue[item.id]?.keterangan ?? ''"
               @input="patch(item.id, { keterangan: ($event.target as HTMLInputElement).value })"

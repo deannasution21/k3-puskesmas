@@ -33,8 +33,8 @@ onMounted(async () => {
 <template>
   <div class="space-y-4">
     <div>
-      <h1 class="text-xl font-semibold text-gray-900">Kuesioner — {{ formatPeriode(periodeBulan, periodeTahun) }}</h1>
-      <RouterLink :to="`/dinas/puskesmas/${route.params.id}`" class="text-sm text-blue-600 hover:underline">
+      <h1 class="text-xl font-bold text-gray-900">Kuesioner — {{ formatPeriode(periodeBulan, periodeTahun) }}</h1>
+      <RouterLink :to="`/dinas/puskesmas/${route.params.id}`" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline mt-1">
         &larr; Kembali ke detail puskesmas
       </RouterLink>
     </div>

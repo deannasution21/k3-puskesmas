@@ -88,46 +88,49 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex items-center justify-between flex-wrap gap-2">
+  <div class="space-y-5">
+    <div class="bg-brand-700 rounded-xl px-6 py-5 flex items-center justify-between flex-wrap gap-3">
       <div>
-        <h1 class="text-xl font-semibold text-gray-900">Observasi Sarana Prasarana K3 (Lampiran 7)</h1>
-        <p class="text-sm text-gray-500">
-          Periode {{ formatPeriode(periodeBulan, periodeTahun) }} &middot;
-          <span :class="answeredCount === items.length ? 'text-green-600' : 'text-yellow-600'">
+        <h1 class="text-xl font-bold text-white">Observasi Sarana Prasarana</h1>
+        <p class="text-brand-100 text-sm mt-0.5">
+          Lampiran 7 &middot; Periode {{ formatPeriode(periodeBulan, periodeTahun) }} &middot;
+          <span class="font-medium" :class="answeredCount === items.length ? 'text-white' : 'text-amber-200'">
             {{ answeredCount }}/{{ items.length }} terjawab
           </span>
         </p>
       </div>
-      <RouterLink to="/puskesmas/observasi/riwayat" class="text-sm text-blue-600 hover:underline">
-        Lihat riwayat
+      <RouterLink
+        to="/puskesmas/observasi/riwayat"
+        class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-3.5 py-2 rounded-lg transition"
+      >
+        Lihat Riwayat
       </RouterLink>
     </div>
 
     <div v-if="loading" class="text-sm text-gray-400">Memuat...</div>
 
     <template v-else>
-      <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-3">
-        <label class="text-sm text-gray-700">Tanggal Observasi</label>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
+        <label class="text-sm font-medium text-gray-700">Tanggal Observasi</label>
         <input
           type="date"
           v-model="tanggalObservasi"
-          class="text-sm border border-gray-300 rounded-md px-2 py-1"
+          class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
       </div>
 
       <ObservationForm :items="items" v-model="answers" />
 
-      <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 py-3 flex items-center gap-3">
+      <div class="sticky bottom-0 bg-gray-50/95 backdrop-blur border-t border-gray-200 py-3 flex items-center gap-3">
         <button
-          class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-md"
+          class="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-base font-medium px-5 py-2.5 rounded-lg transition"
           :disabled="saving"
           @click="save"
         >
           {{ saving ? 'Menyimpan...' : 'Simpan' }}
         </button>
-        <span v-if="savedAt" class="text-xs text-green-600">Tersimpan pukul {{ savedAt }}</span>
-        <span v-if="error" class="text-xs text-red-600">{{ error }}</span>
+        <span v-if="savedAt" class="text-sm text-green-600">Tersimpan pukul {{ savedAt }}</span>
+        <span v-if="error" class="text-sm text-red-600">{{ error }}</span>
       </div>
     </template>
   </div>
