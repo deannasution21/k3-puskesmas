@@ -125,7 +125,7 @@ onMounted(load)
           <div class="flex flex-wrap gap-2">
             <RouterLink
               :to="`/dinas/puskesmas/${puskesmas.id}/edit`"
-              class="inline-flex items-center gap-1.5 text-sm font-medium border border-gray-300 rounded-lg px-3.5 py-2 text-gray-700 hover:bg-gray-50 transition"
+              class="inline-flex items-center gap-1.5 text-sm font-medium rounded-lg px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white transition"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
@@ -134,7 +134,7 @@ onMounted(load)
               Ubah Data
             </RouterLink>
             <button
-              class="inline-flex items-center gap-1.5 text-sm font-medium border border-gray-300 rounded-lg px-3.5 py-2 text-gray-700 hover:bg-gray-50 transition"
+              class="inline-flex items-center gap-1.5 text-sm font-medium rounded-lg px-3.5 py-2 bg-gray-700 hover:bg-gray-800 text-white transition"
               @click="openPasswordModal"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,7 +144,7 @@ onMounted(load)
             </button>
             <button
               :disabled="deleting"
-              class="inline-flex items-center gap-1.5 text-sm font-medium border border-red-300 rounded-lg px-3.5 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50 transition"
+              class="inline-flex items-center gap-1.5 text-sm font-medium rounded-lg px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition"
               @click="hapus"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

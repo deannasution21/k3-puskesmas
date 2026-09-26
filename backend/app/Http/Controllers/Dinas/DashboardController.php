@@ -152,6 +152,7 @@ class DashboardController extends Controller
         return response()->json([
             'periode_bulan' => $bulan,
             'periode_tahun' => $tahun,
+            'total_puskesmas' => Puskesmas::count(),
             'jumlah_puskesmas_isi_kuesioner' => $submissionIds->count(),
             'jumlah_puskesmas_isi_observasi' => $obsSubmissionIds->count(),
             'kuesioner' => $questionnaireRecap,

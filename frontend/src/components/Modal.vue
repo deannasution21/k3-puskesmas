@@ -1,11 +1,16 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   title: string
+  size?: 'sm' | 'md'
 }>()
 
 const emit = defineEmits<{
   close: []
 }>()
+
+const maxWidthClass = computed(() => (props.size === 'md' ? 'max-w-md' : 'max-w-sm'))
 </script>
 
 <template>
@@ -13,7 +18,7 @@ const emit = defineEmits<{
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/40" @click="emit('close')" />
 
-      <div class="relative bg-white rounded-xl shadow-lg w-full max-w-sm">
+      <div class="relative bg-white rounded-xl shadow-lg w-full" :class="maxWidthClass">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <h2 class="font-semibold text-gray-900">{{ title }}</h2>
           <button class="text-gray-400 hover:text-gray-600" @click="emit('close')">

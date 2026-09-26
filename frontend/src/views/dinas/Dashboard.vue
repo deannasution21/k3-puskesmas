@@ -5,21 +5,52 @@ import api from '../../lib/api'
 import { formatPeriode } from '../../lib/periode'
 import PeriodeSelect from '../../components/PeriodeSelect.vue'
 import DonutChart from '../../components/DonutChart.vue'
+import {
+  buildInsights,
+  overallLevelFromInsights,
+  overallBadgeFromLevel,
+  insightLevelIcon,
+  insightLevelClasses,
+  type QuestionnaireRecapItem,
+  type ObservationRecapItem,
+} from '../../lib/insights'
 
 const loading = ref(true)
 const summary = ref<any>(null)
 const periode = ref({ bulan: new Date().getMonth() + 1, tahun: new Date().getFullYear() })
+const kuesionerRecap = ref<QuestionnaireRecapItem[]>([])
+const observasiRecap = ref<ObservationRecapItem[]>([])
 
 async function load() {
   loading.value = true
-  const { data } = await api.get('/api/dashboard/summary', {
-    params: { bulan: periode.value.bulan, tahun: periode.value.tahun },
-  })
-  summary.value = data
+  const [summaryRes, recapRes] = await Promise.all([
+    api.get('/api/dashboard/summary', { params: { bulan: periode.value.bulan, tahun: periode.value.tahun } }),
+    api.get('/api/dashboard/recap', { params: { bulan: periode.value.bulan, tahun: periode.value.tahun } }),
+  ])
+  summary.value = summaryRes.data
+  kuesionerRecap.value = recapRes.data.kuesioner
+  observasiRecap.value = recapRes.data.observasi
   loading.value = false
 }
 
 watch(periode, load, { immediate: true, deep: true })
+
+const insights = computed(() =>
+  summary.value
+    ? buildInsights({
+        totalPuskesmas: summary.value.total_puskesmas,
+        jumlahKuesioner: summary.value.kuesioner_sudah_isi,
+        jumlahObservasi: summary.value.observasi_sudah_isi,
+        kuesioner: kuesionerRecap.value,
+        observasi: observasiRecap.value,
+      })
+    : [],
+)
+const overallLevel = computed(() =>
+  summary.value ? overallLevelFromInsights(insights.value, summary.value.kuesioner_sudah_isi, summary.value.observasi_sudah_isi) : 'empty',
+)
+const overallBadge = computed(() => overallBadgeFromLevel(overallLevel.value))
+const topInsight = computed(() => insights.value[0] ?? null)
 
 const kuesionerPercent = computed(() =>
   summary.value?.total_puskesmas ? (summary.value.kuesioner_sudah_isi / summary.value.total_puskesmas) * 100 : 0,
@@ -113,6 +144,46 @@ const observasiPercent = computed(() =>
           </div>
         </div>
       </div>
+
+      <RouterLink
+        to="/dinas/rekap"
+        class="block bg-white rounded-xl border border-gray-200 hover:border-indigo-300 p-6 transition group"
+      >
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+              </svg>
+            </div>
+            <h2 class="font-semibold text-gray-900">Ringkasan Otomatis</h2>
+            <span class="text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap" :class="overallBadge.classes">
+              {{ overallBadge.label }}
+            </span>
+          </div>
+          <span class="text-sm font-medium text-brand-700 group-hover:underline whitespace-nowrap inline-flex items-center gap-1">
+            Lihat Rekap Lengkap
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </span>
+        </div>
+
+        <div v-if="overallLevel === 'empty'" class="mt-3 text-sm text-gray-400">
+          Belum ada puskesmas yang mengisi kuesioner maupun observasi pada periode ini.
+        </div>
+        <div v-else-if="topInsight" class="mt-3 flex items-start gap-2.5">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5" :class="insightLevelClasses[topInsight.level]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="insightLevelIcon[topInsight.level]" />
+            </svg>
+          </span>
+          <p class="text-sm text-gray-700 leading-relaxed">{{ topInsight.text }}</p>
+        </div>
+        <p v-else class="mt-3 text-sm text-green-700">
+          Semua puskesmas sudah mengisi dan tidak ditemukan temuan bermasalah yang menonjol pada periode ini.
+        </p>
+      </RouterLink>
 
       <div class="flex flex-wrap gap-3">
         <RouterLink
