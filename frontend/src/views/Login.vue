@@ -108,7 +108,7 @@ async function onSubmit() {
       </form>
 
       <p class="text-center text-xs text-gray-400 mt-6">
-        Dinas Ketenagakerjaan &amp; Puskesmas Kota Pontianak
+        Dinas Kesehatan &amp; Puskesmas Kota Pontianak
       </p>
     </div>
   </div>

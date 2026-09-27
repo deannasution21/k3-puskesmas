@@ -19,7 +19,7 @@ const dinasNav = [
   { to: '/dinas/rekap', label: 'Rekap' },
 ]
 
-const displayName = () => (auth.isDinas ? 'Dinas Ketenagakerjaan' : auth.user?.puskesmas?.nama ?? '')
+const displayName = () => (auth.isDinas ? 'Dinas Kesehatan' : auth.user?.puskesmas?.nama ?? '')
 
 async function logout() {
   await auth.logout()

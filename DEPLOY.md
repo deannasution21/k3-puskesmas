@@ -54,7 +54,7 @@ container start, `docker/start.sh` menjalankan berurutan:
    berkali-kali, migration yang sudah jalan otomatis dilewati)
 2. `php artisan deploy:seed-once` — **hanya jalan kalau tabel puskesmas masih
    kosong** (deploy pertama). Otomatis mengisi:
-   - Akun Dinas Ketenagakerjaan (superadmin) + 23 akun Puskesmas asli
+   - Akun Dinas Kesehatan (superadmin) + 23 akun Puskesmas asli
    - 21 pertanyaan Kuesioner K3 & 96 item Observasi
    - Data dummy pengisian 3 bulan ke belakang, supaya dashboard & rekap
      langsung terlihat terisi saat presentasi
