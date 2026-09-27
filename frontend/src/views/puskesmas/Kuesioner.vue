@@ -70,6 +70,10 @@ onMounted(load)
 
 <template>
   <div class="space-y-5">
+    <RouterLink to="/puskesmas/dashboard" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline">
+      &larr; Kembali ke Beranda
+    </RouterLink>
+
     <div class="bg-brand-700 rounded-xl px-6 py-5 flex items-center justify-between flex-wrap gap-3">
       <div>
         <h1 class="text-xl font-bold text-white">Kuesioner K3</h1>
@@ -91,6 +95,16 @@ onMounted(load)
     <div v-if="loading" class="text-sm text-gray-400">Memuat...</div>
 
     <template v-else>
+      <div class="flex items-start gap-2 bg-brand-50 border border-brand-200 rounded-lg px-4 py-2.5 text-sm text-brand-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+        <div class="space-y-0.5">
+          <p>Cara isi: pilih <strong class="text-green-700">Ya</strong> atau <strong class="text-red-600">Tidak</strong> pada tiap pertanyaan, lalu tekan <strong>Simpan</strong>.</p>
+          <p>Bisa disimpan bertahap — lanjutkan kapan saja selama masih bulan berjalan.</p>
+        </div>
+      </div>
+
       <QuestionnaireForm :items="items" v-model="answers" />
 
       <div class="sticky bottom-0 bg-gray-50/95 backdrop-blur border-t border-gray-200 py-3 flex items-center gap-3">

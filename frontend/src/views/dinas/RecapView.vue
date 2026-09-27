@@ -101,6 +101,10 @@ watch(periode, load, { immediate: true, deep: true })
 
 <template>
   <div class="space-y-5">
+    <RouterLink to="/dinas/dashboard" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline">
+      &larr; Kembali ke Beranda
+    </RouterLink>
+
     <div class="bg-brand-700 rounded-xl px-6 py-5 flex items-center justify-between flex-wrap gap-3">
       <div>
         <h1 class="text-xl font-bold text-white">Rekap Jawaban Seluruh Puskesmas</h1>

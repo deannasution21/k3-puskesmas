@@ -26,11 +26,14 @@ const status = computed(() => {
 </script>
 
 <template>
-  <span class="inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-full" :class="status.classes">
+  <span
+    class="inline-flex items-center gap-0.5 sm:gap-1.5 text-xs sm:text-sm font-medium px-1.5 py-1 sm:px-3.5 sm:py-2 rounded-full whitespace-nowrap"
+    :class="status.classes"
+  >
     <svg
       v-if="status.icon === 'check'"
       xmlns="http://www.w3.org/2000/svg"
-      class="w-5 h-5"
+      class="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -40,7 +43,7 @@ const status = computed(() => {
     <svg
       v-else
       xmlns="http://www.w3.org/2000/svg"
-      class="w-5 h-5"
+      class="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

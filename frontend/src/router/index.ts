@@ -104,6 +104,11 @@ const router = createRouter({
       path: '/',
       redirect: '/login',
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      redirect: '/login',
+    },
   ],
 })
 
@@ -122,8 +127,11 @@ router.beforeEach(async (to) => {
     return '/login'
   }
 
+  // Role tidak cocok (mis. akun puskesmas coba akses halaman dinas) -> fallback ke login.
+  // Kalau user masih authenticated, guard guestOnly di atas akan otomatis
+  // meneruskannya ke dashboard sesuai role miliknya sendiri.
   if (to.meta.role && to.meta.role !== auth.user?.role) {
-    return auth.isDinas ? '/dinas/dashboard' : '/puskesmas/dashboard'
+    return '/login'
   }
 
   return true
