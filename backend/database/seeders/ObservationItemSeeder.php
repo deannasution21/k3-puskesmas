@@ -8,8 +8,18 @@ use Illuminate\Database\Seeder;
 class ObservationItemSeeder extends Seeder
 {
     /**
-     * Data diambil apa adanya dari Lampiran 7 - Observasi Sarana dan Prasarana K3 Puskesmas.
+     * Data awal dari Lampiran 7 - Observasi Sarana dan Prasarana K3 Puskesmas,
+     * diperbarui sesuai revisi klien (revisi-program-perbaikan.pdf): seluruh
+     * perubahan di lampiran ini murni penambahan item baru (tidak ada yang
+     * dihapus). Item lama dipertahankan apa adanya (urutan & teks tidak diubah
+     * agar riwayat jawaban lama tidak terganggu), item baru ditambahkan di
+     * akhir tiap kategori yang relevan.
+     *
      * Skala kondisi section A-H: Baik/Buruk. Section I-N: Baik/Rusak Ringan/Rusak Berat.
+     *
+     * Pencocokan baris pakai (kategori_kode, item_teks) persis, bukan nomor -
+     * supaya nomor boleh bertambah tanpa pernah menimpa teks item lama yang
+     * sudah punya jawaban.
      */
     public function run(): void
     {
@@ -50,6 +60,11 @@ class ObservationItemSeeder extends Seeder
                     'Toilet tersedia, higienis, dan jumlahnya memadai',
                     'Tempat parkir tersedia dan memadai',
                     'Tangga bangunan aman digunakan (untuk gedung bertingkat)',
+                    // -- item baru (revisi) --
+                    'Ruang ibadah tersedia',
+                    'Ruang ganti tersedia',
+                    'Ruang bayi dan ruang ASI tersedia',
+                    'Air minum tersedia, serta air untuk kegunaan khusus (ruang tindakan dan laboratorium) sesuai ketentuan',
                 ],
             ],
             'C' => [
@@ -81,6 +96,9 @@ class ObservationItemSeeder extends Seeder
                     'Emergency shower tersedia sesuai risiko',
                     'Kabinet keamanan biologis (biosafety cabinet) tersedia sesuai kebutuhan',
                     'Eye wash/body wash tersedia sesuai risiko',
+                    // -- item baru (revisi) --
+                    'Alas kaki/sepatu tertutup anti slip tersedia dan digunakan oleh SDM laboratorium',
+                    'Masker dan sarung tangan tersedia bagi SDM laboratorium',
                 ],
             ],
             'E' => [
@@ -94,6 +112,11 @@ class ObservationItemSeeder extends Seeder
                     'Spill kit untuk penanganan tumpahan/kebocoran B3 tersedia',
                     'Rambu dan simbol B3 tersedia',
                     'APD tersedia sesuai karakteristik bahan dan limbah B3',
+                    // -- item baru (revisi) --
+                    'Sistem kedaruratan tumpahan/kebocoran bahan dan limbah B3 tersedia',
+                    'SOP pengelolaan bahan dan limbah B3 tersedia (pengurangan dan pemilahan, penyimpanan, pengangkutan)',
+                    'Bahan B3 mudah terbakar dan gas medis disimpan di tempat yang aman',
+                    'Kesepakatan jaminan keamanan kerja tersedia bila pengelolaan limbah B3 dilakukan oleh pihak ketiga',
                 ],
             ],
             'F' => [
@@ -104,6 +127,8 @@ class ObservationItemSeeder extends Seeder
                     'Tempat sampah terpilah organik dan nonorganik tersedia dan dilengkapi tutup',
                     'Kantong plastik pelapis tempat sampah tersedia sesuai jenis sampah',
                     'APD petugas kebersihan (masker, sarung tangan, sepatu boots) tersedia',
+                    // -- item baru (revisi) --
+                    'Sarana cuci tangan dengan sabun tersedia bagi petugas setelah mengelola sampah',
                 ],
             ],
             'G' => [
@@ -126,6 +151,13 @@ class ObservationItemSeeder extends Seeder
                     'Document holder/penyangga dokumen tersedia sesuai kebutuhan',
                     'Troli tersedia untuk mengangkut barang berat/tinggi',
                     'Lift barang tersedia sesuai kebutuhan (bila tersedia)',
+                    // -- item baru (revisi) --
+                    'Tata letak ruang kerja memberikan ruang udara minimal 10 m³ per pekerja',
+                    'Lantai ruang kerja bebas dari bahan licin, cekungan, miring, dan berlubang',
+                    'Lemari peralatan dan material kerja tidak mengganggu lalu lintas SDM, dengan benda berat di bagian bawah',
+                    'Tangga tidak digunakan untuk menyimpan barang atau berkumpul',
+                    'Tempat duduk untuk istirahat sejenak tersedia bagi SDM yang bekerja dengan posisi berdiri lama',
+                    'Bangku/pijakan khusus tersedia untuk menjangkau alat kerja yang tinggi atau untuk ruang persalinan (bila diperlukan)',
                 ],
             ],
             'I' => [
@@ -194,6 +226,11 @@ class ObservationItemSeeder extends Seeder
                     'Inspeksi dan pengujian peralatan kesehatan dilakukan secara berkala',
                     'Pemeliharaan peralatan kesehatan dilakukan secara berkala',
                     'Kalibrasi peralatan kesehatan dilakukan secara berkala',
+                    // -- item baru (revisi) --
+                    'Penandaan peralatan medis yang digunakan dan yang tidak digunakan tersedia',
+                    'Uji fungsi dan uji coba peralatan medis dilakukan',
+                    'Penyimpanan dan penggunaan peralatan medis sesuai SOP',
+                    'Daftar periksa (checklist) pemantauan pengelolaan peralatan medis tersedia',
                 ],
             ],
             'N' => [
@@ -216,12 +253,13 @@ class ObservationItemSeeder extends Seeder
         foreach ($kategoriList as $kode => $kategori) {
             foreach ($kategori['items'] as $index => $itemTeks) {
                 ObservationItem::updateOrCreate(
-                    ['kategori_kode' => $kode, 'nomor' => $index + 1],
+                    ['kategori_kode' => $kode, 'item_teks' => $itemTeks],
                     [
                         'kategori' => $kategori['nama'],
-                        'item_teks' => $itemTeks,
+                        'nomor' => $index + 1,
                         'skala_kondisi' => $kategori['skala'],
                         'sumber' => $kategori['sumber'],
+                        'aktif' => true,
                     ],
                 );
             }

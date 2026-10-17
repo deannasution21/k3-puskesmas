@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['kategori_kode', 'kategori', 'nomor', 'pertanyaan', 'rujukan'])]
+#[Fillable(['kategori_kode', 'kategori', 'nomor', 'pertanyaan', 'rujukan', 'aktif'])]
 class QuestionnaireItem extends Model
 {
     public $timestamps = true;
+
+    protected $casts = ['aktif' => 'boolean'];
 
     public function answers(): HasMany
     {

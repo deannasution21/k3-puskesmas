@@ -13,7 +13,7 @@ class QuestionnaireController extends Controller
 {
     public function items()
     {
-        return QuestionnaireItem::orderBy('kategori_kode')->orderBy('nomor')->get();
+        return QuestionnaireItem::where('aktif', true)->orderBy('kategori_kode')->orderBy('nomor')->get();
     }
 
     public function current(Request $request)

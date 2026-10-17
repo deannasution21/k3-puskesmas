@@ -85,4 +85,35 @@ class DashboardTest extends TestCase
 
         $this->getJson('/api/dashboard/summary')->assertStatus(403);
     }
+
+    public function test_nonaktif_item_without_answers_is_excluded_from_recap(): void
+    {
+        $nonaktif = \App\Models\QuestionnaireItem::where('aktif', false)->firstOrFail();
+
+        $this->actingAsDinas();
+        $response = $this->getJson('/api/dashboard/recap')->assertOk();
+
+        $found = collect($response->json('kuesioner'))->firstWhere('pertanyaan', $nonaktif->pertanyaan);
+
+        $this->assertNull($found);
+    }
+
+    public function test_nonaktif_item_with_answer_this_period_still_appears_in_recap(): void
+    {
+        $nonaktif = \App\Models\QuestionnaireItem::where('aktif', false)->firstOrFail();
+        $puskesmas = Puskesmas::factory()->create();
+
+        $this->actingAsPuskesmas($puskesmas);
+        $this->postJson('/api/questionnaire/submissions', [
+            'answers' => [['item_id' => $nonaktif->id, 'jawaban' => 'ya']],
+        ])->assertOk();
+
+        $this->actingAsDinas();
+        $response = $this->getJson('/api/dashboard/recap')->assertOk();
+
+        $found = collect($response->json('kuesioner'))->firstWhere('pertanyaan', $nonaktif->pertanyaan);
+
+        $this->assertNotNull($found);
+        $this->assertEquals(1, $found['ya']);
+    }
 }

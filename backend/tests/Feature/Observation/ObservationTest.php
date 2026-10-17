@@ -17,11 +17,11 @@ class ObservationTest extends TestCase
         $this->seed(ObservationItemSeeder::class);
     }
 
-    public function test_puskesmas_can_list_96_items(): void
+    public function test_puskesmas_can_list_117_items(): void
     {
         $this->actingAsPuskesmas();
 
-        $this->getJson('/api/observation/items')->assertOk()->assertJsonCount(96);
+        $this->getJson('/api/observation/items')->assertOk()->assertJsonCount(117);
     }
 
     public function test_kondisi_matching_item_scale_is_accepted(): void

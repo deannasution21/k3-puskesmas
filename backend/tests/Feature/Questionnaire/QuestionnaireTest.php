@@ -17,11 +17,23 @@ class QuestionnaireTest extends TestCase
         $this->seed(QuestionnaireItemSeeder::class);
     }
 
-    public function test_puskesmas_can_list_21_items(): void
+    public function test_puskesmas_can_list_56_active_items(): void
     {
         $this->actingAsPuskesmas();
 
-        $this->getJson('/api/questionnaire/items')->assertOk()->assertJsonCount(21);
+        $this->getJson('/api/questionnaire/items')->assertOk()->assertJsonCount(56);
+    }
+
+    public function test_nonaktif_item_is_excluded_from_active_list(): void
+    {
+        $this->actingAsPuskesmas();
+
+        $nonaktif = \App\Models\QuestionnaireItem::where('aktif', false)->firstOrFail();
+
+        $response = $this->getJson('/api/questionnaire/items')->assertOk();
+        $ids = collect($response->json())->pluck('id');
+
+        $this->assertFalse($ids->contains($nonaktif->id));
     }
 
     public function test_current_submission_is_null_when_not_yet_filled(): void

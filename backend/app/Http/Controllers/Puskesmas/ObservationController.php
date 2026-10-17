@@ -19,7 +19,7 @@ class ObservationController extends Controller
 
     public function items()
     {
-        return ObservationItem::orderBy('kategori_kode')->orderBy('nomor')->get();
+        return ObservationItem::where('aktif', true)->orderBy('kategori_kode')->orderBy('nomor')->get();
     }
 
     public function current(Request $request)

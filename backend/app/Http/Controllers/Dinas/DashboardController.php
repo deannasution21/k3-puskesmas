@@ -114,7 +114,14 @@ class DashboardController extends Controller
         $submissionIds = QuestionnaireSubmission::where('periode_bulan', $bulan)
             ->where('periode_tahun', $tahun)->pluck('id');
 
-        $questionnaireRecap = QuestionnaireItem::orderBy('kategori_kode')->orderBy('nomor')->get()
+        // Item ditampilkan kalau masih aktif (untuk periode berjalan/depan), ATAU
+        // punya jawaban di periode yang dipilih (supaya item yang sudah dinonaktifkan
+        // tetap muncul saat melihat rekap periode lama saat item itu masih berlaku).
+        $questionnaireRecap = QuestionnaireItem::where(function ($query) use ($submissionIds) {
+            $query->where('aktif', true)
+                ->orWhereHas('answers', fn ($q) => $q->whereIn('submission_id', $submissionIds));
+        })
+            ->orderBy('kategori_kode')->orderBy('nomor')->get()
             ->map(function (QuestionnaireItem $item) use ($submissionIds) {
                 $answers = $item->answers()->whereIn('submission_id', $submissionIds)->get();
 
@@ -132,7 +139,11 @@ class DashboardController extends Controller
         $obsSubmissionIds = ObservationSubmission::where('periode_bulan', $bulan)
             ->where('periode_tahun', $tahun)->pluck('id');
 
-        $observationRecap = ObservationItem::orderBy('kategori_kode')->orderBy('nomor')->get()
+        $observationRecap = ObservationItem::where(function ($query) use ($obsSubmissionIds) {
+            $query->where('aktif', true)
+                ->orWhereHas('answers', fn ($q) => $q->whereIn('submission_id', $obsSubmissionIds));
+        })
+            ->orderBy('kategori_kode')->orderBy('nomor')->get()
             ->map(function (ObservationItem $item) use ($obsSubmissionIds) {
                 $answers = $item->answers()->whereIn('submission_id', $obsSubmissionIds)->get();
 
