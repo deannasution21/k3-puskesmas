@@ -564,6 +564,7 @@ watch(periode, load, { immediate: true, deep: true })
       v-if="penilaianKategoriOpen"
       :title="`Kategori: ${kategoriLabelShort[penilaianKategoriOpen]}`"
       size="md"
+      :header-class="kategoriBadgeClasses[penilaianKategoriOpen]"
       @close="penilaianKategoriOpen = null"
     >
       <p class="text-sm text-gray-500 mb-3">

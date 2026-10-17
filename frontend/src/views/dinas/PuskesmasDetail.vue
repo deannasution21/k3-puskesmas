@@ -225,13 +225,15 @@ onMounted(load)
                   <span v-else class="text-gray-300">-</span>
                 </td>
                 <td class="px-4 py-3">
-                  <span
-                    class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-                    :class="kategoriBadgeClasses[r.penilaian.kategori_key]"
-                    :title="r.penilaian.kategori_label"
-                  >
-                    {{ r.penilaian.persen }}%
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                      :class="kategoriBadgeClasses[r.penilaian.kategori_key]"
+                    >
+                      {{ r.penilaian.persen }}%
+                    </span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap">{{ r.penilaian.kategori_label }}</span>
+                  </div>
                 </td>
               </tr>
             </tbody>
