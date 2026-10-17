@@ -2,9 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import api from '../../lib/api'
-import { formatPeriode } from '../../lib/periode'
+import { formatPeriode, useQueryPeriode } from '../../lib/periode'
 import PeriodeSelect from '../../components/PeriodeSelect.vue'
 import StatusPengisianBadge from '../../components/StatusPengisianBadge.vue'
+import { kategoriBadgeClasses } from '../../lib/penilaian'
 
 interface Row {
   id: number
@@ -14,11 +15,14 @@ interface Row {
   kode_puskesmas: string | null
   kuesioner_sudah_isi: boolean
   observasi_sudah_isi: boolean
+  penilaian_persen: number
+  penilaian_kategori_key: string
+  penilaian_kategori_label: string
 }
 
 const loading = ref(true)
 const rows = ref<Row[]>([])
-const periode = ref({ bulan: new Date().getMonth() + 1, tahun: new Date().getFullYear() })
+const periode = useQueryPeriode()
 const search = ref('')
 
 const filtered = computed(() =>
@@ -46,7 +50,10 @@ watch(periode, load, { immediate: true, deep: true })
     <div class="bg-brand-700 rounded-xl px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <h1 class="text-xl font-bold text-white">Daftar Puskesmas</h1>
-        <p class="text-brand-100 text-sm mt-0.5">Status pengisian periode {{ formatPeriode(periode.bulan, periode.tahun) }}</p>
+        <p class="text-brand-100 text-sm mt-0.5">
+          Status pengisian periode
+          <span class="inline-block bg-white/15 text-white font-semibold px-2 py-0.5 rounded ml-1">{{ formatPeriode(periode.bulan, periode.tahun) }}</span>
+        </p>
       </div>
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <PeriodeSelect v-model="periode" class="w-full sm:w-auto" />
@@ -78,6 +85,7 @@ watch(periode, load, { immediate: true, deep: true })
             <th class="px-2.5 sm:px-4 py-3 font-medium">Puskesmas</th>
             <th class="px-1.5 sm:px-4 py-3 font-medium">Kuesioner</th>
             <th class="px-1.5 sm:px-4 py-3 font-medium">Observasi</th>
+            <th class="px-1.5 sm:px-4 py-3 font-medium">Skor K3</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -101,6 +109,14 @@ watch(periode, load, { immediate: true, deep: true })
                 :periode-bulan="periode.bulan"
                 :periode-tahun="periode.tahun"
               />
+            </td>
+            <td class="px-1.5 sm:px-4 py-3">
+              <span
+                class="inline-flex items-center gap-1 text-xs sm:text-sm font-medium px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-full whitespace-nowrap"
+                :class="kategoriBadgeClasses[r.penilaian_kategori_key] ?? 'bg-gray-100 text-gray-600'"
+              >
+                {{ r.penilaian_persen }}%
+              </span>
             </td>
           </tr>
         </tbody>

@@ -20,7 +20,8 @@ const options = computed(() => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const bulan = d.getMonth() + 1
     const tahun = d.getFullYear()
-    list.push({ key: `${tahun}-${bulan}`, bulan, tahun, label: formatPeriode(bulan, tahun) })
+    const label = i === 0 ? `(Bulan Ini) ${formatPeriode(bulan, tahun)}` : formatPeriode(bulan, tahun)
+    list.push({ key: `${tahun}-${bulan}`, bulan, tahun, label })
   }
 
   return list

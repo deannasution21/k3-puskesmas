@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import AttachmentField from './AttachmentField.vue'
+import type { Attachment } from '../lib/attachments'
 
 interface Item {
   id: number
@@ -12,11 +14,14 @@ interface Item {
 const props = defineProps<{
   items: Item[]
   modelValue: Record<number, 'ya' | 'tidak' | undefined>
+  attachments?: Record<number, Attachment[]>
   readonly?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: Record<number, 'ya' | 'tidak' | undefined>]
+  'attachment-uploaded': [itemId: number, attachments: Attachment[]]
+  'attachment-deleted': [itemId: number, attachmentId: number]
 }>()
 
 const grouped = computed(() => {
@@ -43,32 +48,42 @@ function setJawaban(itemId: number, jawaban: 'ya' | 'tidak') {
         {{ kode }}. {{ group.kategori }}
       </h2>
       <ul class="divide-y divide-gray-100">
-        <li v-for="item in group.items" :key="item.id" class="px-4 py-3.5 flex items-center justify-between gap-4">
-          <p class="text-[15px] text-gray-700 flex-1">{{ item.nomor }}. {{ item.pertanyaan }}</p>
-          <div class="flex gap-2 shrink-0">
-            <button
-              type="button"
-              :disabled="readonly"
-              class="px-4 py-2 text-sm font-medium rounded-lg border transition"
-              :class="modelValue[item.id] === 'ya'
-                ? 'bg-green-600 text-white border-green-600'
-                : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
-              @click="setJawaban(item.id, 'ya')"
-            >
-              Ya
-            </button>
-            <button
-              type="button"
-              :disabled="readonly"
-              class="px-4 py-2 text-sm font-medium rounded-lg border transition"
-              :class="modelValue[item.id] === 'tidak'
-                ? 'bg-red-600 text-white border-red-600'
-                : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
-              @click="setJawaban(item.id, 'tidak')"
-            >
-              Tidak
-            </button>
+        <li v-for="item in group.items" :key="item.id" class="px-4 py-3.5">
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-[15px] text-gray-700 flex-1">{{ item.nomor }}. {{ item.pertanyaan }}</p>
+            <div class="flex gap-2 shrink-0">
+              <button
+                type="button"
+                :disabled="readonly"
+                class="px-4 py-2 text-sm font-medium rounded-lg border transition"
+                :class="modelValue[item.id] === 'ya'
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
+                @click="setJawaban(item.id, 'ya')"
+              >
+                Ya
+              </button>
+              <button
+                type="button"
+                :disabled="readonly"
+                class="px-4 py-2 text-sm font-medium rounded-lg border transition"
+                :class="modelValue[item.id] === 'tidak'
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
+                @click="setJawaban(item.id, 'tidak')"
+              >
+                Tidak
+              </button>
+            </div>
           </div>
+          <AttachmentField
+            kind="questionnaire"
+            :item-id="item.id"
+            :attachments="attachments?.[item.id] ?? []"
+            :readonly="readonly"
+            @uploaded="(id, a) => emit('attachment-uploaded', id, a)"
+            @deleted="(id, a) => emit('attachment-deleted', id, a)"
+          />
         </li>
       </ul>
     </section>

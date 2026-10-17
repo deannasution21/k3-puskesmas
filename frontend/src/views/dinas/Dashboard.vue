@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import api from '../../lib/api'
-import { formatPeriode } from '../../lib/periode'
+import { formatPeriode, useQueryPeriode } from '../../lib/periode'
 import PeriodeSelect from '../../components/PeriodeSelect.vue'
 import DonutChart from '../../components/DonutChart.vue'
 import {
@@ -17,7 +17,7 @@ import {
 
 const loading = ref(true)
 const summary = ref<any>(null)
-const periode = ref({ bulan: new Date().getMonth() + 1, tahun: new Date().getFullYear() })
+const periode = useQueryPeriode()
 const kuesionerRecap = ref<QuestionnaireRecapItem[]>([])
 const observasiRecap = ref<ObservationRecapItem[]>([])
 
@@ -62,18 +62,28 @@ const observasiPercent = computed(() =>
 
 <template>
   <div class="space-y-6">
-    <div class="bg-brand-700 rounded-xl px-6 py-5 flex items-center justify-between flex-wrap gap-3">
-      <div>
-        <h1 class="text-xl font-bold text-white">Dashboard Dinas Kesehatan</h1>
-        <p class="text-brand-100 text-sm mt-0.5">Pemantauan K3 seluruh Puskesmas Kota Pontianak</p>
+    <div class="bg-brand-700 rounded-xl px-6 py-5 flex items-center justify-between flex-wrap gap-4">
+      <div class="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-4 text-center sm:text-left">
+        <img
+          src="/logo-kota-pontianak.png"
+          alt="Lambang Kota Pontianak"
+          class="w-14 h-14 shrink-0 object-contain bg-white/95 rounded-full p-1.5"
+        />
+        <div>
+          <p class="text-brand-100 text-sm font-medium">Selamat datang, Dinas Kesehatan Kota Pontianak</p>
+          <h1 class="text-xl font-bold text-white mt-0.5">Dashboard Pemantauan K3 Puskesmas</h1>
+        </div>
       </div>
-      <PeriodeSelect v-model="periode" />
+      <PeriodeSelect v-model="periode" class="mx-auto sm:mx-0" />
     </div>
 
     <div v-if="loading" class="text-sm text-gray-400">Memuat...</div>
 
     <template v-else>
-      <p class="text-sm text-gray-500">Menampilkan data periode <strong>{{ formatPeriode(summary.periode_bulan, summary.periode_tahun) }}</strong></p>
+      <p class="text-sm text-gray-500">
+        Menampilkan data periode
+        <span class="inline-block bg-brand-50 text-brand-700 font-semibold px-1.5 py-0.5 rounded ml-0.5">{{ formatPeriode(summary.periode_bulan, summary.periode_tahun) }}</span>
+      </p>
 
       <div class="grid md:grid-cols-3 gap-5">
         <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-center gap-4">
@@ -146,7 +156,7 @@ const observasiPercent = computed(() =>
       </div>
 
       <RouterLink
-        to="/dinas/rekap"
+        :to="{ path: '/dinas/rekap', query: { bulan: periode.bulan, tahun: periode.tahun } }"
         class="block bg-white rounded-xl border border-gray-200 hover:border-indigo-300 p-6 transition group"
       >
         <div class="flex items-center justify-between flex-wrap gap-3">
@@ -187,13 +197,13 @@ const observasiPercent = computed(() =>
 
       <div class="flex flex-wrap gap-3">
         <RouterLink
-          to="/dinas/puskesmas"
+          :to="{ path: '/dinas/puskesmas', query: { bulan: periode.bulan, tahun: periode.tahun } }"
           class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 transition"
         >
           Lihat Daftar &amp; Status Puskesmas &rarr;
         </RouterLink>
         <RouterLink
-          to="/dinas/rekap"
+          :to="{ path: '/dinas/rekap', query: { bulan: periode.bulan, tahun: periode.tahun } }"
           class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 transition"
         >
           Lihat Rekap Jawaban &rarr;

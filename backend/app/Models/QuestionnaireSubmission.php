@@ -24,4 +24,9 @@ class QuestionnaireSubmission extends Model
     {
         return $this->hasMany(QuestionnaireAnswer::class, 'submission_id');
     }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(QuestionnaireAnswerAttachment::class, 'submission_id');
+    }
 }

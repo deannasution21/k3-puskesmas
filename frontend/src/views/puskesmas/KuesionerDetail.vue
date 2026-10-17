@@ -4,10 +4,12 @@ import { RouterLink, useRoute } from 'vue-router'
 import api from '../../lib/api'
 import { formatPeriode } from '../../lib/periode'
 import QuestionnaireForm from '../../components/QuestionnaireForm.vue'
+import { groupAttachmentsByItem, type Attachment } from '../../lib/attachments'
 
 const route = useRoute()
 const items = ref<any[]>([])
 const answers = ref<Record<number, 'ya' | 'tidak' | undefined>>({})
+const attachmentsByItem = ref<Record<number, Attachment[]>>({})
 const periodeBulan = ref(0)
 const periodeTahun = ref(0)
 const loading = ref(true)
@@ -26,6 +28,7 @@ onMounted(async () => {
   }
   items.value = itemList.sort((a, b) => (a.kategori_kode + a.nomor).localeCompare(b.kategori_kode + b.nomor))
   answers.value = map
+  attachmentsByItem.value = groupAttachmentsByItem(data.attachments ?? [])
   loading.value = false
 })
 </script>
@@ -40,6 +43,6 @@ onMounted(async () => {
     </div>
 
     <div v-if="loading" class="text-sm text-gray-400">Memuat...</div>
-    <QuestionnaireForm v-else :items="items" v-model="answers" readonly />
+    <QuestionnaireForm v-else :items="items" v-model="answers" :attachments="attachmentsByItem" readonly />
   </div>
 </template>

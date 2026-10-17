@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import AttachmentField from './AttachmentField.vue'
+import type { Attachment } from '../lib/attachments'
 
 interface Item {
   id: number
@@ -19,11 +21,14 @@ export interface ObservationAnswer {
 const props = defineProps<{
   items: Item[]
   modelValue: Record<number, ObservationAnswer>
+  attachments?: Record<number, Attachment[]>
   readonly?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: Record<number, ObservationAnswer>]
+  'attachment-uploaded': [itemId: number, attachments: Attachment[]]
+  'attachment-deleted': [itemId: number, attachmentId: number]
 }>()
 
 const kondisiOptions: Record<Item['skala_kondisi'], { value: string; label: string }[]> = {
@@ -116,6 +121,15 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
               @input="patch(item.id, { keterangan: ($event.target as HTMLInputElement).value })"
             />
           </div>
+
+          <AttachmentField
+            kind="observation"
+            :item-id="item.id"
+            :attachments="attachments?.[item.id] ?? []"
+            :readonly="readonly"
+            @uploaded="(id, a) => emit('attachment-uploaded', id, a)"
+            @deleted="(id, a) => emit('attachment-deleted', id, a)"
+          />
         </li>
       </ul>
     </section>

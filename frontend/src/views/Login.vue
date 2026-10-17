@@ -38,7 +38,10 @@ async function onSubmit() {
   <div class="min-h-screen flex items-center justify-center bg-brand-50 px-4 py-10">
     <div class="w-full max-w-sm">
       <div class="flex flex-col items-center text-center mb-6">
-        <img src="/logo-puskesmas.png" alt="Logo Puskesmas" class="w-20 h-20 mb-3" />
+        <div class="flex items-center gap-3 mb-3">
+          <img src="/logo-puskesmas.png" alt="Logo Puskesmas" class="w-20 h-20" />
+          <img src="/logo-kota-pontianak.png" alt="Lambang Kota Pontianak" class="w-20 h-20 object-contain" />
+        </div>
         <h1 class="text-xl font-bold text-gray-900">Monitoring K3 Puskesmas</h1>
         <p class="text-sm text-gray-500 mt-0.5">Kota Pontianak</p>
       </div>

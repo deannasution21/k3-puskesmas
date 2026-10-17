@@ -31,4 +31,9 @@ class ObservationSubmission extends Model
     {
         return $this->hasMany(ObservationAnswer::class, 'submission_id');
     }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ObservationAnswerAttachment::class, 'submission_id');
+    }
 }

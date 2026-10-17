@@ -33,7 +33,7 @@ const dash = computed(() => `${Math.max(0, Math.min(100, props.percent))}, 100`)
         fill="none"
         :stroke="color"
         :stroke-width="strokeWidth"
-        stroke-linecap="round"
+        stroke-linecap="butt"
         :stroke-dasharray="dash"
       />
     </svg>

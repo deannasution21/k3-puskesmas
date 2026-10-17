@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import Swal from 'sweetalert2'
 import api from '../../lib/api'
 import { formatPeriode } from '../../lib/periode'
 import { extractErrorMessage } from '../../lib/errors'
 import QuestionnaireForm from '../../components/QuestionnaireForm.vue'
+import { groupAttachmentsByItem, type Attachment } from '../../lib/attachments'
 
 interface Item {
   id: number
@@ -16,6 +18,7 @@ interface Item {
 
 const items = ref<Item[]>([])
 const answers = ref<Record<number, 'ya' | 'tidak' | undefined>>({})
+const attachmentsByItem = ref<Record<number, Attachment[]>>({})
 const periodeBulan = ref(0)
 const periodeTahun = ref(0)
 const loading = ref(true)
@@ -38,7 +41,22 @@ async function load() {
     map[a.item_id] = a.jawaban
   }
   answers.value = map
+  attachmentsByItem.value = groupAttachmentsByItem(currentRes.data.submission?.attachments ?? [])
   loading.value = false
+}
+
+function onAttachmentUploaded(itemId: number, newAttachments: Attachment[]) {
+  attachmentsByItem.value = {
+    ...attachmentsByItem.value,
+    [itemId]: [...(attachmentsByItem.value[itemId] ?? []), ...newAttachments],
+  }
+}
+
+function onAttachmentDeleted(itemId: number, attachmentId: number) {
+  attachmentsByItem.value = {
+    ...attachmentsByItem.value,
+    [itemId]: (attachmentsByItem.value[itemId] ?? []).filter((a) => a.id !== attachmentId),
+  }
 }
 
 async function save() {
@@ -51,6 +69,18 @@ async function save() {
     error.value = 'Isi minimal satu pertanyaan sebelum menyimpan.'
     return
   }
+
+  const confirm = await Swal.fire({
+    title: 'Simpan Jawaban Kuesioner?',
+    html: `${answeredCount.value}/${items.value.length} pertanyaan sudah terjawab untuk periode <strong>${formatPeriode(periodeBulan.value, periodeTahun.value)}</strong>.<br><br>Tenang, kalau belum semua terisi Anda bisa melanjutkan pengisian kapan saja selama masih bulan berjalan.`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Simpan',
+    cancelButtonText: 'Batal',
+    confirmButtonColor: '#1f8143',
+    cancelButtonColor: '#6b7280',
+  })
+  if (!confirm.isConfirmed) return
 
   saving.value = true
   try {
@@ -105,7 +135,13 @@ onMounted(load)
         </div>
       </div>
 
-      <QuestionnaireForm :items="items" v-model="answers" />
+      <QuestionnaireForm
+        :items="items"
+        v-model="answers"
+        :attachments="attachmentsByItem"
+        @attachment-uploaded="onAttachmentUploaded"
+        @attachment-deleted="onAttachmentDeleted"
+      />
 
       <div class="sticky bottom-0 bg-gray-50/95 backdrop-blur border-t border-gray-200 py-3 flex items-center gap-3">
         <button

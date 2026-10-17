@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const menuOpen = ref(false)
 
 const puskesmasNav = [
@@ -13,11 +14,20 @@ const puskesmasNav = [
   { to: '/puskesmas/observasi', label: 'Observasi' },
 ]
 
-const dinasNav = [
-  { to: '/dinas/dashboard', label: 'Dashboard' },
-  { to: '/dinas/puskesmas', label: 'Daftar Puskesmas' },
-  { to: '/dinas/rekap', label: 'Rekap' },
-]
+// Halaman dinas yang punya filter periode: bawa query bulan/tahun yang sedang
+// dipilih saat pindah antar menu, supaya filter tidak reset tiap navigasi.
+const dinasNav = computed(() => {
+  const periodeQuery =
+    route.query.bulan && route.query.tahun
+      ? { bulan: route.query.bulan, tahun: route.query.tahun }
+      : {}
+
+  return [
+    { to: { path: '/dinas/dashboard', query: periodeQuery }, label: 'Dashboard' },
+    { to: { path: '/dinas/puskesmas', query: periodeQuery }, label: 'Daftar Puskesmas' },
+    { to: { path: '/dinas/rekap', query: periodeQuery }, label: 'Rekap' },
+  ]
+})
 
 const displayName = () => (auth.isDinas ? 'Dinas Kesehatan' : auth.user?.puskesmas?.nama ?? '')
 
@@ -34,6 +44,11 @@ async function logout() {
         <div class="flex items-center gap-8">
           <RouterLink :to="auth.isDinas ? '/dinas/dashboard' : '/puskesmas/dashboard'" class="flex items-center gap-2.5">
             <img src="/logo-puskesmas.png" alt="Logo Puskesmas" class="w-9 h-9 shrink-0" />
+            <img
+              src="/logo-kota-pontianak.png"
+              alt="Lambang Kota Pontianak"
+              class="w-9 h-9 shrink-0 object-contain"
+            />
             <span class="leading-tight">
               <span class="block font-bold text-gray-900 text-base">Monitoring K3</span>
               <span class="block font-normal text-gray-500 text-xs">Puskesmas Kota Pontianak</span>
@@ -42,7 +57,7 @@ async function logout() {
           <nav class="hidden md:flex gap-1">
             <RouterLink
               v-for="item in auth.isDinas ? dinasNav : puskesmasNav"
-              :key="item.to"
+              :key="item.label"
               :to="item.to"
               class="px-3 py-2 text-[15px] rounded-md text-gray-600 hover:bg-brand-50 hover:text-brand-700 transition"
               active-class="!text-brand-700 !bg-brand-50 font-semibold"
@@ -86,7 +101,7 @@ async function logout() {
         </div>
         <RouterLink
           v-for="item in auth.isDinas ? dinasNav : puskesmasNav"
-          :key="item.to"
+          :key="item.label"
           :to="item.to"
           class="block px-3 py-2.5 text-[15px] rounded-md text-gray-600 hover:bg-brand-50"
           active-class="!text-brand-700 !bg-brand-50 font-semibold"

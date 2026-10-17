@@ -3,14 +3,18 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   title: string
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
 }>()
 
 const emit = defineEmits<{
   close: []
 }>()
 
-const maxWidthClass = computed(() => (props.size === 'md' ? 'max-w-md' : 'max-w-sm'))
+const maxWidthClass = computed(() => {
+  if (props.size === 'lg') return 'max-w-2xl'
+  if (props.size === 'md') return 'max-w-md'
+  return 'max-w-sm'
+})
 </script>
 
 <template>

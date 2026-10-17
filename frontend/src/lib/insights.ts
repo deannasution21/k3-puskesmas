@@ -1,4 +1,5 @@
 export interface QuestionnaireRecapItem {
+  id: number
   kategori_kode: string
   kategori: string
   nomor: number
@@ -9,6 +10,7 @@ export interface QuestionnaireRecapItem {
 }
 
 export interface ObservationRecapItem {
+  id: number
   kategori_kode: string
   kategori: string
   nomor: number

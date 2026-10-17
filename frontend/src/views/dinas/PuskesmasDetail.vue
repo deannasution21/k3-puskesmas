@@ -1,23 +1,48 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import api from '../../lib/api'
-import { formatPeriode, periodeKey } from '../../lib/periode'
+import { formatPeriode, formatPeriodeSingkat, periodeKey } from '../../lib/periode'
 import { extractErrorMessage } from '../../lib/errors'
 import Modal from '../../components/Modal.vue'
 import CredentialBox from '../../components/CredentialBox.vue'
+import ScoreTrendChart from '../../components/ScoreTrendChart.vue'
+import { kategoriBadgeClasses, type PenilaianPuskesmas } from '../../lib/penilaian'
+
+interface RiwayatRow {
+  periode_bulan: number
+  periode_tahun: number
+  kuesioner_answers_count: number | null
+  observasi_answers_count: number | null
+  penilaian: PenilaianPuskesmas
+}
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const puskesmas = ref<any>(null)
-const kuesionerHistory = ref<any[]>([])
-const observasiHistory = ref<any[]>([])
+const riwayat = ref<RiwayatRow[]>([])
 
 const showPasswordModal = ref(false)
 const newPassword = ref('')
 const resetting = ref(false)
+
+const trendPoints = computed(() =>
+  [...riwayat.value]
+    .reverse()
+    .map((r) => ({ label: formatPeriodeSingkat(r.periode_bulan, r.periode_tahun), persen: r.penilaian.persen })),
+)
+
+const backLink = computed(() => {
+  if (route.query.from === 'rekap') {
+    const query: Record<string, string> = {}
+    if (route.query.bulan) query.bulan = String(route.query.bulan)
+    if (route.query.tahun) query.tahun = String(route.query.tahun)
+    return { to: { path: '/dinas/rekap', query }, label: 'Kembali ke Rekap' }
+  }
+  return { to: '/dinas/puskesmas', label: 'Kembali ke daftar puskesmas' }
+})
 const resetError = ref('')
 const justResetPassword = ref<string | null>(null)
 const deleting = ref(false)
@@ -25,8 +50,7 @@ const deleting = ref(false)
 async function load() {
   const { data } = await api.get(`/api/dashboard/puskesmas/${route.params.id}`)
   puskesmas.value = data.puskesmas
-  kuesionerHistory.value = data.kuesioner_history
-  observasiHistory.value = data.observasi_history
+  riwayat.value = data.riwayat
   loading.value = false
 }
 
@@ -90,8 +114,8 @@ onMounted(load)
 <template>
   <div class="space-y-6">
     <div>
-      <RouterLink to="/dinas/puskesmas" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline">
-        &larr; Kembali ke daftar puskesmas
+      <RouterLink :to="backLink.to" class="inline-flex items-center gap-1 text-sm text-brand-700 hover:underline">
+        &larr; {{ backLink.label }}
       </RouterLink>
     </div>
 
@@ -158,37 +182,60 @@ onMounted(load)
         <CredentialBox class="max-w-sm" :username="puskesmas.user?.username" />
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <h2 class="px-4 py-3 border-b border-gray-200 bg-brand-50 font-semibold text-sm text-brand-800">Riwayat Kuesioner</h2>
-          <p v-if="kuesionerHistory.length === 0" class="px-4 py-3 text-sm text-gray-400">Belum ada pengisian.</p>
-          <ul v-else class="divide-y divide-gray-100">
-            <li v-for="s in kuesionerHistory" :key="s.id">
-              <RouterLink
-                :to="`/dinas/puskesmas/${puskesmas.id}/kuesioner/${periodeKey(s.periode_bulan, s.periode_tahun)}`"
-                class="flex items-center justify-between px-4 py-3 hover:bg-brand-50/60 transition"
-              >
-                <span class="text-[15px] text-gray-900">{{ formatPeriode(s.periode_bulan, s.periode_tahun) }}</span>
-                <span class="text-sm text-gray-400">{{ s.answers_count }}/21 terisi</span>
-              </RouterLink>
-            </li>
-          </ul>
-        </div>
+      <div v-if="trendPoints.length > 0" class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="font-semibold text-gray-900">Tren Skor K3</h2>
+        <p class="text-xs text-gray-400 mt-0.5 mb-3">Perkembangan skor penilaian K3 antar periode</p>
+        <ScoreTrendChart :points="trendPoints" />
+      </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <h2 class="px-4 py-3 border-b border-gray-200 bg-brand-50 font-semibold text-sm text-brand-800">Riwayat Observasi</h2>
-          <p v-if="observasiHistory.length === 0" class="px-4 py-3 text-sm text-gray-400">Belum ada pengisian.</p>
-          <ul v-else class="divide-y divide-gray-100">
-            <li v-for="s in observasiHistory" :key="s.id">
-              <RouterLink
-                :to="`/dinas/puskesmas/${puskesmas.id}/observasi/${periodeKey(s.periode_bulan, s.periode_tahun)}`"
-                class="flex items-center justify-between px-4 py-3 hover:bg-brand-50/60 transition"
-              >
-                <span class="text-[15px] text-gray-900">{{ formatPeriode(s.periode_bulan, s.periode_tahun) }}</span>
-                <span class="text-sm text-gray-400">{{ s.answers_count }}/96 terisi</span>
-              </RouterLink>
-            </li>
-          </ul>
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <h2 class="px-4 py-3 border-b border-gray-200 bg-brand-50 font-semibold text-sm text-brand-800">Riwayat Pengisian &amp; Penilaian K3</h2>
+        <p v-if="riwayat.length === 0" class="px-4 py-3 text-sm text-gray-400">Belum ada pengisian.</p>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-500 border-b border-gray-200 bg-gray-50">
+                <th class="px-4 py-2.5 font-medium">Periode</th>
+                <th class="px-4 py-2.5 font-medium">Kuesioner</th>
+                <th class="px-4 py-2.5 font-medium">Observasi</th>
+                <th class="px-4 py-2.5 font-medium">Skor K3</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="r in riwayat" :key="`${r.periode_tahun}-${r.periode_bulan}`" class="hover:bg-brand-50/40 transition">
+                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{{ formatPeriode(r.periode_bulan, r.periode_tahun) }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <RouterLink
+                    v-if="r.kuesioner_answers_count !== null"
+                    :to="`/dinas/puskesmas/${puskesmas.id}/kuesioner/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
+                    class="text-brand-700 hover:underline"
+                  >
+                    {{ r.kuesioner_answers_count }} jawaban
+                  </RouterLink>
+                  <span v-else class="text-gray-300">-</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <RouterLink
+                    v-if="r.observasi_answers_count !== null"
+                    :to="`/dinas/puskesmas/${puskesmas.id}/observasi/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
+                    class="text-brand-700 hover:underline"
+                  >
+                    {{ r.observasi_answers_count }} item
+                  </RouterLink>
+                  <span v-else class="text-gray-300">-</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                    :class="kategoriBadgeClasses[r.penilaian.kategori_key]"
+                    :title="r.penilaian.kategori_label"
+                  >
+                    {{ r.penilaian.persen }}%
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
