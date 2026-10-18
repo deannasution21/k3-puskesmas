@@ -48,21 +48,34 @@ tidak perlu diisi manual.
 ## 5. Deploy
 
 Railway akan build & jalankan otomatis setelah variable diisi. Setiap kali
-container start, `docker/start.sh` menjalankan berurutan:
+container start, `docker/start.sh` menjalankan `php artisan migrate --force`
+(bikin/update semua tabel — aman dijalankan berkali-kali, migration yang
+sudah jalan otomatis dilewati). Seeding data **tidak** dijalankan otomatis
+lagi di sini (lihat catatan di bawah).
 
-1. `php artisan migrate --force` — bikin semua tabel (aman dijalankan
-   berkali-kali, migration yang sudah jalan otomatis dilewati)
-2. `php artisan deploy:seed-once` — **hanya jalan kalau tabel puskesmas masih
-   kosong** (deploy pertama). Otomatis mengisi:
-   - Akun Dinas Kesehatan (superadmin) + 23 akun Puskesmas asli
-   - 21 pertanyaan Kuesioner K3 & 96 item Observasi
-   - Data dummy pengisian 3 bulan ke belakang, supaya dashboard & rekap
-     langsung terlihat terisi saat presentasi
+### Seeding data awal (sekali saja, manual)
 
-Jadi begitu deploy pertama selesai, database **sudah langsung terisi
-otomatis** — tidak perlu perintah manual apa pun. Redeploy/restart berikutnya
-tidak akan mengulang seeding (dicek dulu datanya sudah ada atau belum), jadi
-tidak akan bentrok data.
+Untuk deploy pertama kali (database masih kosong), jalankan manual lewat
+Railway shell/console di service backend:
+
+```
+php artisan deploy:seed-once
+```
+
+Perintah ini mengisi:
+- Akun Dinas Kesehatan (superadmin) + 23 akun Puskesmas asli
+- Pertanyaan Kuesioner K3 & item Observasi
+- Data dummy pengisian 3 bulan ke belakang (opsional, untuk demo/preview
+  tampilan — lewati kalau database sudah ada data asli)
+
+**Penting:** perintah ini sengaja **tidak** lagi dipanggil otomatis di
+`docker/start.sh`. Sebelumnya `deploy:seed-once` dijalankan di setiap
+container start dengan guard "hanya jalan kalau tabel puskesmas kosong" —
+tapi begitu database sudah berisi data asli dari puskesmas, risiko apa pun
+yang membuat tabel itu sempat kebaca kosong (misalnya env var yang salah,
+dsb) akan memicu reseed ulang dan menimpa data asli dengan data dummy. Karena
+sekarang data yang dipakai sudah data asli (bukan demo lagi), seeding hanya
+boleh dijalankan manual dan sadar, bukan otomatis setiap deploy.
 
 ## 6. Cek
 
