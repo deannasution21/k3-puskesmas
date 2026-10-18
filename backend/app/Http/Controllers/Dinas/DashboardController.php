@@ -15,6 +15,7 @@ use App\Models\QuestionnaireSubmission;
 use App\Support\Penilaian;
 use App\Support\Periode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -126,6 +127,25 @@ class DashboardController extends Controller
         return response()->json($submission);
     }
 
+    public function destroyQuestionnaireSubmission(Puskesmas $puskesmas, string $periode)
+    {
+        [$bulan, $tahun] = Periode::parse($periode);
+
+        $submission = $puskesmas->questionnaireSubmissions()
+            ->with('attachments')
+            ->where('periode_bulan', $bulan)
+            ->where('periode_tahun', $tahun)
+            ->firstOrFail();
+
+        foreach ($submission->attachments as $attachment) {
+            Storage::disk('local')->delete($attachment->path);
+        }
+
+        $submission->delete();
+
+        return response()->json(['message' => 'Data kuesioner periode tersebut berhasil dihapus.']);
+    }
+
     public function observationDetail(Puskesmas $puskesmas, string $periode)
     {
         [$bulan, $tahun] = Periode::parse($periode);
@@ -137,6 +157,25 @@ class DashboardController extends Controller
             ->firstOrFail();
 
         return response()->json($submission);
+    }
+
+    public function destroyObservationSubmission(Puskesmas $puskesmas, string $periode)
+    {
+        [$bulan, $tahun] = Periode::parse($periode);
+
+        $submission = $puskesmas->observationSubmissions()
+            ->with('attachments')
+            ->where('periode_bulan', $bulan)
+            ->where('periode_tahun', $tahun)
+            ->firstOrFail();
+
+        foreach ($submission->attachments as $attachment) {
+            Storage::disk('local')->delete($attachment->path);
+        }
+
+        $submission->delete();
+
+        return response()->json(['message' => 'Data observasi periode tersebut berhasil dihapus.']);
     }
 
     public function recap(Request $request)

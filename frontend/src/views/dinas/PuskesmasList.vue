@@ -112,10 +112,10 @@ watch(periode, load, { immediate: true, deep: true })
             </td>
             <td class="px-1.5 sm:px-4 py-3">
               <span
-                class="inline-flex items-center gap-1 text-xs sm:text-sm font-medium px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-full whitespace-nowrap"
+                class="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-full whitespace-nowrap uppercase"
                 :class="kategoriBadgeClasses[r.penilaian_kategori_key] ?? 'bg-gray-100 text-gray-600'"
               >
-                {{ r.penilaian_persen }}%
+                {{ r.penilaian_persen }}%<span class="hidden sm:inline"> &middot; {{ r.penilaian_kategori_label }}</span>
               </span>
             </td>
           </tr>

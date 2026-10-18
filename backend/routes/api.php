@@ -46,7 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/puskesmas', [DashboardController::class, 'puskesmasIndex']);
         Route::get('/puskesmas/{puskesmas}', [DashboardController::class, 'puskesmasShow']);
         Route::get('/puskesmas/{puskesmas}/questionnaire/{periode}', [DashboardController::class, 'questionnaireDetail']);
+        Route::delete('/puskesmas/{puskesmas}/questionnaire/{periode}', [DashboardController::class, 'destroyQuestionnaireSubmission']);
         Route::get('/puskesmas/{puskesmas}/observation/{periode}', [DashboardController::class, 'observationDetail']);
+        Route::delete('/puskesmas/{puskesmas}/observation/{periode}', [DashboardController::class, 'destroyObservationSubmission']);
         Route::get('/recap', [DashboardController::class, 'recap']);
         Route::get('/recap/kuesioner/{item}/puskesmas', [DashboardController::class, 'recapKuesionerItemPuskesmas']);
         Route::get('/recap/observasi/{item}/puskesmas', [DashboardController::class, 'recapObservasiItemPuskesmas']);

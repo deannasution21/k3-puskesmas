@@ -78,6 +78,35 @@ async function resetPassword() {
   }
 }
 
+async function hapusSubmission(kind: 'questionnaire' | 'observation', r: RiwayatRow) {
+  const label = kind === 'questionnaire' ? 'Kuesioner' : 'Observasi'
+  const result = await Swal.fire({
+    title: `Hapus Data ${label}?`,
+    html: `Data ${label} puskesmas <strong>${puskesmas.value.nama}</strong> untuk periode <strong>${formatPeriode(r.periode_bulan, r.periode_tahun)}</strong> beserta lampirannya akan dihapus permanen.<br>Tindakan ini tidak bisa dibatalkan.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, Hapus',
+    cancelButtonText: 'Batal',
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    reverseButtons: true,
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await api.delete(`/api/dashboard/puskesmas/${puskesmas.value.id}/${kind}/${periodeKey(r.periode_bulan, r.periode_tahun)}`)
+    await load()
+  } catch (e) {
+    Swal.fire({
+      title: 'Gagal Menghapus',
+      text: extractErrorMessage(e),
+      icon: 'error',
+      confirmButtonColor: '#2563eb',
+    })
+  }
+}
+
 async function hapus() {
   const result = await Swal.fire({
     title: 'Hapus Puskesmas Ini?',
@@ -205,35 +234,54 @@ onMounted(load)
               <tr v-for="r in riwayat" :key="`${r.periode_tahun}-${r.periode_bulan}`" class="hover:bg-brand-50/40 transition">
                 <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{{ formatPeriode(r.periode_bulan, r.periode_tahun) }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
-                  <RouterLink
-                    v-if="r.kuesioner_answers_count !== null"
-                    :to="`/dinas/puskesmas/${puskesmas.id}/kuesioner/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
-                    class="text-brand-700 hover:underline"
-                  >
-                    {{ r.kuesioner_answers_count }} jawaban
-                  </RouterLink>
+                  <div v-if="r.kuesioner_answers_count !== null" class="inline-flex items-center gap-1.5">
+                    <RouterLink
+                      :to="`/dinas/puskesmas/${puskesmas.id}/kuesioner/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
+                      class="text-brand-700 hover:underline"
+                    >
+                      {{ r.kuesioner_answers_count }} jawaban
+                    </RouterLink>
+                    <button
+                      type="button"
+                      class="text-gray-300 hover:text-red-600 transition"
+                      title="Hapus data kuesioner periode ini"
+                      @click="hapusSubmission('questionnaire', r)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </div>
                   <span v-else class="text-gray-300">-</span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
-                  <RouterLink
-                    v-if="r.observasi_answers_count !== null"
-                    :to="`/dinas/puskesmas/${puskesmas.id}/observasi/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
-                    class="text-brand-700 hover:underline"
-                  >
-                    {{ r.observasi_answers_count }} item
-                  </RouterLink>
+                  <div v-if="r.observasi_answers_count !== null" class="inline-flex items-center gap-1.5">
+                    <RouterLink
+                      :to="`/dinas/puskesmas/${puskesmas.id}/observasi/${periodeKey(r.periode_bulan, r.periode_tahun)}`"
+                      class="text-brand-700 hover:underline"
+                    >
+                      {{ r.observasi_answers_count }} item
+                    </RouterLink>
+                    <button
+                      type="button"
+                      class="text-gray-300 hover:text-red-600 transition"
+                      title="Hapus data observasi periode ini"
+                      @click="hapusSubmission('observation', r)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </div>
                   <span v-else class="text-gray-300">-</span>
                 </td>
                 <td class="px-4 py-3">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-                      :class="kategoriBadgeClasses[r.penilaian.kategori_key]"
-                    >
-                      {{ r.penilaian.persen }}%
-                    </span>
-                    <span class="text-xs text-gray-500 whitespace-nowrap">{{ r.penilaian.kategori_label }}</span>
-                  </div>
+                  <span
+                    class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap uppercase"
+                    :class="kategoriBadgeClasses[r.penilaian.kategori_key]"
+                  >
+                    {{ r.penilaian.persen }}% &middot; {{ r.penilaian.kategori_label }}
+                  </span>
                 </td>
               </tr>
             </tbody>
