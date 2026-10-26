@@ -137,11 +137,15 @@ class DashboardController extends Controller
             ->where('periode_tahun', $tahun)
             ->firstOrFail();
 
-        foreach ($submission->attachments as $attachment) {
-            Storage::disk('local')->delete($attachment->path);
-        }
+        $attachmentPaths = $submission->attachments->pluck('path')->unique();
 
         $submission->delete();
+
+        foreach ($attachmentPaths as $path) {
+            if (! QuestionnaireAnswerAttachment::where('path', $path)->exists()) {
+                Storage::disk('local')->delete($path);
+            }
+        }
 
         return response()->json(['message' => 'Data kuesioner periode tersebut berhasil dihapus.']);
     }
@@ -169,11 +173,15 @@ class DashboardController extends Controller
             ->where('periode_tahun', $tahun)
             ->firstOrFail();
 
-        foreach ($submission->attachments as $attachment) {
-            Storage::disk('local')->delete($attachment->path);
-        }
+        $attachmentPaths = $submission->attachments->pluck('path')->unique();
 
         $submission->delete();
+
+        foreach ($attachmentPaths as $path) {
+            if (! ObservationAnswerAttachment::where('path', $path)->exists()) {
+                Storage::disk('local')->delete($path);
+            }
+        }
 
         return response()->json(['message' => 'Data observasi periode tersebut berhasil dihapus.']);
     }
@@ -276,6 +284,9 @@ class DashboardController extends Controller
                         'original_name' => $a->original_name,
                         'mime_type' => $a->mime_type,
                         'size' => $a->size,
+                        'reused_from_attachment_id' => $a->reused_from_attachment_id,
+                        'reused_from_periode_bulan' => $a->reused_from_periode_bulan,
+                        'reused_from_periode_tahun' => $a->reused_from_periode_tahun,
                     ])->values(),
                 ];
             });
@@ -320,6 +331,9 @@ class DashboardController extends Controller
                         'original_name' => $a->original_name,
                         'mime_type' => $a->mime_type,
                         'size' => $a->size,
+                        'reused_from_attachment_id' => $a->reused_from_attachment_id,
+                        'reused_from_periode_bulan' => $a->reused_from_periode_bulan,
+                        'reused_from_periode_tahun' => $a->reused_from_periode_tahun,
                     ])->values(),
                 ];
             });

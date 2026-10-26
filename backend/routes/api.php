@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/submissions', [QuestionnaireController::class, 'history']);
         Route::get('/submissions/{periode}', [QuestionnaireController::class, 'show']);
         Route::post('/items/{item}/attachments', [QuestionnaireController::class, 'uploadAttachment']);
+        Route::get('/items/{item}/attachments/reusable', [QuestionnaireController::class, 'reusableAttachments']);
+        Route::post('/items/{item}/attachments/reuse', [QuestionnaireController::class, 'reuseAttachment']);
         Route::delete('/attachments/{attachment}', [QuestionnaireController::class, 'destroyAttachment']);
     });
 
@@ -34,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/submissions', [ObservationController::class, 'history']);
         Route::get('/submissions/{periode}', [ObservationController::class, 'show']);
         Route::post('/items/{item}/attachments', [ObservationController::class, 'uploadAttachment']);
+        Route::get('/items/{item}/attachments/reusable', [ObservationController::class, 'reusableAttachments']);
+        Route::post('/items/{item}/attachments/reuse', [ObservationController::class, 'reuseAttachment']);
         Route::delete('/attachments/{attachment}', [ObservationController::class, 'destroyAttachment']);
     });
 

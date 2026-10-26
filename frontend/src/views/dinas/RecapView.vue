@@ -72,6 +72,9 @@ interface ItemDetailAttachment {
   original_name: string
   mime_type: string
   size: number
+  reused_from_attachment_id?: number | null
+  reused_from_periode_bulan?: number | null
+  reused_from_periode_tahun?: number | null
 }
 
 interface ItemDetailRow {
@@ -552,6 +555,19 @@ watch(periode, load, { immediate: true, deep: true })
                   <span class="truncate">{{ file.original_name }}</span>
                   <span class="text-gray-400 shrink-0">({{ formatFileSize(file.size) }})</span>
                 </a>
+                  <span
+                    v-for="file in p.lampiran.filter((attachment) => attachment.reused_from_attachment_id)"
+                    :key="`reuse-${file.id}`"
+                    class="inline-flex items-center rounded-md bg-amber-100 px-2 py-1 text-[11px] text-amber-900"
+                  >
+                    {{ itemDetailKind === 'observasi'
+                      ? file.reused_from_periode_bulan && file.reused_from_periode_tahun
+                        ? `Referensi ${formatPeriode(file.reused_from_periode_bulan, file.reused_from_periode_tahun)}; bukan bukti kondisi saat ini`
+                        : 'Referensi periode sebelumnya; bukan bukti kondisi saat ini'
+                      : file.reused_from_periode_bulan && file.reused_from_periode_tahun
+                        ? `Digunakan dari ${formatPeriode(file.reused_from_periode_bulan, file.reused_from_periode_tahun)}`
+                        : 'Digunakan dari periode sebelumnya' }}
+                  </span>
               </div>
             </li>
           </ul>

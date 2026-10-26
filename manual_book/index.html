@@ -1,0 +1,619 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Panduan Monitoring K3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Layout: fixed left table-of-contents on desktop (collapses to a top
+     drawer on phones) beside a single scrolling content column — a manual
+     is read by jumping to a section, not top to bottom, so navigation is
+     structural, not decorative. */
+  :root{
+    --bg:#f6f7f4; --surface:#ffffff; --surface-2:#f0f2ed;
+    --border:#e2e5dd; --fg:#1b2420; --fg-muted:#5c6a5f; --fg-faint:#8b968b;
+    --brand:#1f8143; --brand-dark:#14532d; --brand-tint:#e8f3ec;
+    --dinas:#a8681b; --dinas-tint:#faf1e3;
+    --warn:#b45309; --warn-tint:#fef3e0;
+    --danger:#b42318; --danger-tint:#fdeceb;
+    --code-bg:#eef1ea;
+    --shadow: 0 1px 2px rgba(20,30,20,.04), 0 8px 24px -12px rgba(20,30,20,.12);
+    color-scheme: light;
+    --font-display:'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+    --font-body:'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141a15; --surface:#1b231c; --surface-2:#202a21;
+      --border:#2c382d; --fg:#eef2ec; --fg-muted:#a7b3a5; --fg-faint:#6f7d6f;
+      --brand:#49c17a; --brand-dark:#bdf0d2; --brand-tint:#1b3324;
+      --dinas:#e0a449; --dinas-tint:#36280f;
+      --warn:#e0a449; --warn-tint:#352808;
+      --danger:#f2857a; --danger-tint:#3a1512;
+      --code-bg:#1f2920;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141a15; --surface:#1b231c; --surface-2:#202a21;
+    --border:#2c382d; --fg:#eef2ec; --fg-muted:#a7b3a5; --fg-faint:#6f7d6f;
+    --brand:#49c17a; --brand-dark:#bdf0d2; --brand-tint:#1b3324;
+    --dinas:#e0a449; --dinas-tint:#36280f;
+    --warn:#e0a449; --warn-tint:#352808;
+    --danger:#f2857a; --danger-tint:#3a1512;
+    --code-bg:#1f2920;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--fg); font-family:var(--font-body); line-height:1.6; font-size:15.5px}
+  h1,h2,h3,h4{font-family:var(--font-display); color:var(--fg); line-height:1.25; text-wrap:balance; margin:0}
+  p{margin:0 0 .9em}
+  a{color:var(--brand)}
+  img{display:block}
+
+  .shell{display:flex; min-height:100%}
+
+  /* ---------- Sidebar / TOC ---------- */
+  .sidebar{
+    width:272px; flex-shrink:0; border-right:1px solid var(--border);
+    background:var(--surface); position:sticky; top:0; align-self:flex-start;
+    height:100vh; overflow-y:auto; padding:22px 18px 40px;
+  }
+  .sidebar-brand{display:flex; align-items:center; gap:10px; padding:4px 6px 18px; border-bottom:1px solid var(--border); margin-bottom:14px}
+  .sidebar-brand img{width:30px; height:30px; object-fit:contain}
+  .sidebar-brand div{font-family:var(--font-display); font-weight:700; font-size:14.5px}
+  .sidebar-brand small{display:block; font-weight:500; color:var(--fg-muted); font-size:11.5px}
+  .toc-group{margin-bottom:6px}
+  .toc-label{
+    display:flex; align-items:center; gap:7px; font-size:11px; font-weight:700;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--fg-faint);
+    padding:14px 8px 6px;
+  }
+  .role-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0}
+  .role-dot.puskesmas{background:var(--brand)}
+  .role-dot.dinas{background:var(--dinas)}
+  .toc-group a{
+    display:block; padding:7px 10px 7px 25px; border-radius:8px; font-size:13.5px;
+    color:var(--fg-muted); text-decoration:none; font-weight:500;
+  }
+  .toc-group a:hover{background:var(--surface-2); color:var(--fg)}
+  .toc-group a.active{background:var(--brand-tint); color:var(--brand-dark); font-weight:600}
+
+  .menu-btn{display:none}
+
+  /* ---------- Main content ---------- */
+  main{flex:1; min-width:0; padding:0 0 80px}
+  .page-wrap{max-width:760px; margin:0 auto; padding:0 28px}
+
+  .hero{
+    background:linear-gradient(165deg, var(--brand-dark), var(--brand));
+    color:#fff; padding:52px 28px 46px;
+  }
+  .hero-inner{max-width:760px; margin:0 auto}
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.14);
+    padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600;
+    letter-spacing:.03em; margin-bottom:16px;
+  }
+  .hero h1{font-size:clamp(26px,4.2vw,36px); font-weight:800; color:#fff}
+  .hero p{color:rgba(255,255,255,.88); font-size:16px; max-width:56ch; margin-top:10px}
+  .hero-badges{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap}
+  .hero-badge{
+    display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.22); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
+  }
+
+  section.doc-section{padding-top:52px; scroll-margin-top:20px}
+  section.doc-section:first-of-type{padding-top:44px}
+  .section-kicker{display:flex; align-items:center; gap:9px; margin-bottom:10px}
+  .role-tag{
+    font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    padding:4px 10px; border-radius:999px;
+  }
+  .role-tag.puskesmas{background:var(--brand-tint); color:var(--brand-dark)}
+  .role-tag.dinas{background:var(--dinas-tint); color:var(--dinas)}
+  h2.sec-title{font-size:25px; font-weight:800; margin-bottom:6px}
+  .sec-lede{color:var(--fg-muted); font-size:15px; max-width:62ch; margin-bottom:26px}
+  h3.sub-title{font-size:17.5px; font-weight:700; margin:34px 0 10px}
+
+  /* ---------- Step list ---------- */
+  ol.steps{list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:18px}
+  ol.steps > li{display:flex; gap:14px}
+  .step-num{
+    width:28px; height:28px; border-radius:50%; background:var(--brand); color:#fff;
+    font-family:var(--font-display); font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  .step-body{min-width:0}
+  .step-body strong{display:block; font-size:15px; margin-bottom:2px; font-weight:600}
+  .step-body p{color:var(--fg-muted); font-size:14px; margin:0}
+
+  /* ---------- Callouts ---------- */
+  .callout{
+    display:flex; gap:11px; border-radius:12px; padding:14px 16px; margin:18px 0 26px;
+    font-size:13.8px; border:1px solid transparent;
+  }
+  .callout svg{flex-shrink:0; margin-top:1px}
+  .callout.tip{background:var(--brand-tint); border-color:color-mix(in srgb, var(--brand) 25%, transparent); color:var(--brand-dark)}
+  .callout.warn{background:var(--warn-tint); border-color:color-mix(in srgb, var(--warn) 30%, transparent); color:var(--warn)}
+  .callout b{font-weight:700}
+
+  /* ---------- Screenshot frame ---------- */
+  figure.shot{
+    margin:20px 0 28px; border-radius:14px; overflow:hidden; border:1px solid var(--border);
+    background:var(--surface-2); box-shadow:var(--shadow);
+  }
+  .shot-bar{display:flex; align-items:center; gap:6px; padding:9px 12px; background:var(--surface-2); border-bottom:1px solid var(--border)}
+  .shot-bar span{width:8px; height:8px; border-radius:50%; background:var(--border)}
+  figure.shot img{width:100%; height:auto; background:var(--surface)}
+  figcaption{
+    font-size:12.5px; color:var(--fg-faint); padding:10px 14px; background:var(--surface);
+    border-top:1px solid var(--border);
+  }
+  .shot-row{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media (max-width:640px){.shot-row{grid-template-columns:1fr}}
+
+  /* ---------- Field reference table ---------- */
+  table.ref{width:100%; border-collapse:collapse; font-size:13.5px; margin:16px 0 28px}
+  table.ref th{text-align:left; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--fg-faint); padding:0 10px 8px; border-bottom:1px solid var(--border)}
+  table.ref td{padding:10px 10px; border-bottom:1px solid var(--border); vertical-align:top; color:var(--fg-muted)}
+  table.ref td:first-child{color:var(--fg); font-weight:600; white-space:nowrap}
+  table.ref{overflow-x:auto; display:block}
+  table.ref thead,table.ref tbody{display:table; width:100%; table-layout:fixed}
+
+  /* ---------- Category/badge chips referenced in text ---------- */
+  .chip{display:inline-flex; align-items:center; padding:1px 8px; border-radius:999px; font-size:12.5px; font-weight:600}
+  .chip.yes{background:#dcf3e3; color:#146c38}
+  .chip.no{background:#fbe1dd; color:#a3311f}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.yes{background:#143321;color:#7fe3a6} :root:not([data-theme="light"]) .chip.no{background:#3a1813;color:#f2a194}}
+  :root[data-theme="dark"] .chip.yes{background:#143321;color:#7fe3a6}
+  :root[data-theme="dark"] .chip.no{background:#3a1813;color:#f2a194}
+
+  /* ---------- FAQ ---------- */
+  details.faq{border:1px solid var(--border); border-radius:12px; margin-bottom:10px; background:var(--surface); overflow:hidden}
+  details.faq summary{
+    padding:14px 16px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  details.faq summary::-webkit-details-marker{display:none}
+  details.faq summary::after{content:'+'; font-size:20px; color:var(--fg-faint); font-weight:400; flex-shrink:0}
+  details.faq[open] summary::after{content:'–'}
+  details.faq p{padding:0 16px 16px; color:var(--fg-muted); font-size:13.8px; margin:0}
+
+  footer.doc-footer{
+    max-width:760px; margin:40px auto 0; padding:24px 28px 0; border-top:1px solid var(--border);
+    color:var(--fg-faint); font-size:12.5px;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:880px){
+    .sidebar{
+      position:fixed; inset:0 18% 0 0; transform:translateX(-100%); transition:transform .22s ease;
+      z-index:40; box-shadow:0 0 0 2000px rgba(0,0,0,.35);
+    }
+    .sidebar.open{transform:translateX(0)}
+    .menu-btn{
+      display:flex; position:sticky; top:12px; z-index:20; margin:12px 0 0 max(16px, env(safe-area-inset-left,0px));
+      align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border);
+      padding:9px 14px; border-radius:10px; font-family:var(--font-display); font-weight:700; font-size:13px;
+      color:var(--fg); box-shadow:var(--shadow); width:fit-content;
+    }
+    .page-wrap{padding:0 max(16px, env(safe-area-inset-left,0px)) 0 max(16px, env(safe-area-inset-right,0px))}
+    .hero{padding-left:max(20px, env(safe-area-inset-left,0px)); padding-right:max(20px, env(safe-area-inset-right,0px))}
+  }
+</style>
+
+<div class="shell">
+  <button class="menu-btn" id="menuBtn" aria-expanded="false">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    Daftar Isi
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.6"><path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.1c0-1.13-.84-2.1-1.97-2.19a48 48 0 00-1.13-.08m-5.8 0c-.07.21-.1.43-.1.66 0 .42.33.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.66m-5.8 0A2.25 2.25 0 0113.5 2.25H15c1.01 0 1.87.67 2.15 1.59m-5.8 0c-.38.02-.75.05-1.12.08C9.1 4.01 8.25 4.97 8.25 6.1v2.15m0 0H4.88c-.62 0-1.13.5-1.13 1.13v11.25c0 .62.51 1.12 1.13 1.12h9.75c.62 0 1.12-.5 1.12-1.12V9.38c0-.63-.5-1.13-1.12-1.13H8.25z"/></svg>
+      <div>Monitoring K3<small>Panduan Pengguna</small></div>
+    </div>
+
+    <div class="toc-group">
+      <a href="#mulai">Memulai &amp; Login</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-label"><span class="role-dot puskesmas"></span>Akun Puskesmas</div>
+      <a href="#p-dashboard">Dashboard</a>
+      <a href="#p-kuesioner">Mengisi Kuesioner K3</a>
+      <a href="#p-observasi">Mengisi Observasi</a>
+      <a href="#p-riwayat">Riwayat Pengisian</a>
+      <a href="#p-lupa">Lupa Password</a>
+    </div>
+
+    <div class="toc-group">
+      <div class="toc-label"><span class="role-dot dinas"></span>Akun Dinas Kesehatan</div>
+      <a href="#d-dashboard">Dashboard</a>
+      <a href="#d-puskesmas">Daftar &amp; Tambah Puskesmas</a>
+      <a href="#d-detail">Detail Puskesmas &amp; Skor K3</a>
+      <a href="#d-rekap">Rekap Jawaban Seluruh Puskesmas</a>
+      <a href="#d-hapus">Mengelola &amp; Menghapus Data</a>
+    </div>
+
+    <div class="toc-group">
+      <a href="#faq">Pertanyaan Umum</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div class="hero-inner">
+        <span class="hero-eyebrow">📘 Panduan Pengguna</span>
+        <h1>Monitoring K3 Puskesmas Kota Pontianak</h1>
+        <p>Panduan lengkap penggunaan sistem pelaporan Keselamatan &amp; Kesehatan Kerja (K3) untuk dua jenis akun: petugas Puskesmas yang mengisi laporan bulanan, dan admin Dinas Kesehatan yang memantau seluruh Puskesmas.</p>
+        <div class="hero-badges">
+          <span class="hero-badge"><span class="role-dot puskesmas" style="background:#fff"></span>Akun Puskesmas</span>
+          <span class="hero-badge"><span class="role-dot dinas" style="background:#fff"></span>Akun Dinas Kesehatan</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+
+      <section class="doc-section" id="mulai">
+        <h2 class="sec-title">Memulai &amp; Login</h2>
+        <p class="sec-lede">Setiap petugas Puskesmas dan admin Dinas Kesehatan login lewat halaman yang sama. Sistem otomatis mengarahkan ke dashboard yang sesuai berdasarkan jenis akun.</p>
+
+        <ol class="steps">
+          <li><span class="step-num">1</span><div class="step-body"><strong>Buka halaman login</strong><p>Masukkan <em>Username</em> dan <em>Password</em> yang diberikan oleh admin Dinas Kesehatan (untuk akun Puskesmas) atau yang sudah disediakan sejak awal (untuk akun Dinas).</p></div></li>
+          <li><span class="step-num">2</span><div class="step-body"><strong>Tekan tombol "Masuk"</strong><p>Sistem akan mengenali jenis akun secara otomatis dan membawa ke Dashboard Puskesmas atau Dashboard Dinas Kesehatan.</p></div></li>
+        </ol>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/00-login-page.png" alt="Halaman login Monitoring K3" loading="lazy">
+          <figcaption>Halaman login — sama untuk akun Puskesmas maupun Dinas Kesehatan.</figcaption>
+        </figure>
+
+        <div class="callout tip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.04-.02a.75.75 0 011.06.85l-.7 2.84a.75.75 0 001.06.85l.04-.02M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.01v.01H12V8.25z"/></svg>
+          <div>Lupa password? Klik tautan <b>"Lupa password? Hubungi admin via WhatsApp"</b> di bawah tombol Masuk — pesan WhatsApp ke admin akan terisi otomatis, tinggal dikirim.</div>
+        </div>
+      </section>
+
+      <!-- ========================= PUSKESMAS ========================= -->
+
+      <section class="doc-section" id="p-dashboard">
+        <div class="section-kicker"><span class="role-tag puskesmas">Akun Puskesmas</span></div>
+        <h2 class="sec-title">Dashboard</h2>
+        <p class="sec-lede">Halaman pertama setelah login. Menampilkan status pengisian bulan berjalan dan skor K3 Puskesmas.</p>
+
+        <div class="shot-row">
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/30-puskesmas-dashboard-kosong.png" alt="Dashboard Puskesmas sebelum mengisi data" loading="lazy">
+            <figcaption>Sebelum mengisi apa pun — skor belum muncul, cukup wajar.</figcaption>
+          </figure>
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/40-puskesmas-dashboard-terisi.png" alt="Dashboard Puskesmas setelah ada data terisi" loading="lazy">
+            <figcaption>Setelah mulai mengisi — skor K3 otomatis muncul dan diperbarui.</figcaption>
+          </figure>
+        </div>
+
+        <div class="callout tip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.04A8.97 8.97 0 006 3.75c-1.05 0-2.06.18-3 .51v14.25A9 9 0 016 18c2.3 0 4.4.87 6 2.29m0-14.25a8.97 8.97 0 016-2.29c1.05 0 2.06.18 3 .51v14.25A9 9 0 0018 18a8.97 8.97 0 00-6 2.29m0-14.25v14.25"/></svg>
+          <div>Klik ikon <b>ⓘ</b> di sebelah judul "Penilaian K3 Bulan Ini" untuk melihat penjelasan singkat bagaimana skor itu dihitung.</div>
+        </div>
+
+        <p>Dashboard juga menampilkan peringatan kuning/merah kalau pengisian belum selesai mendekati akhir bulan — pengisian otomatis terkunci begitu bulan berganti, jadi jangan sampai terlewat.</p>
+      </section>
+
+      <section class="doc-section" id="p-kuesioner">
+        <div class="section-kicker"><span class="role-tag puskesmas">Akun Puskesmas</span></div>
+        <h2 class="sec-title">Mengisi Kuesioner K3</h2>
+        <p class="sec-lede">Lampiran 6 — 56 pertanyaan seputar kebijakan, pencatatan, identifikasi risiko, pemantauan, dan kebutuhan sistem digital K3, terbagi dalam 5 kategori (A–E).</p>
+
+        <ol class="steps">
+          <li><span class="step-num">1</span><div class="step-body"><strong>Buka menu "Kuesioner"</strong><p>Setiap pertanyaan dijawab dengan menekan tombol <span class="chip yes">Ya</span> atau <span class="chip no">Tidak</span>.</p></div></li>
+          <li><span class="step-num">2</span><div class="step-body"><strong>Lampirkan bukti pendukung (opsional, tapi disarankan)</strong><p>Tiap pertanyaan punya tombol <em>"Tambah Lampiran/Bukti"</em> — bisa unggah lebih dari satu file (foto, PDF, dokumen) sebagai bukti pendukung jawaban. File tersimpan otomatis begitu diunggah.</p></div></li>
+          <li><span class="step-num">3</span><div class="step-body"><strong>Tekan "Simpan"</strong><p>Akan muncul konfirmasi berisi ringkasan berapa pertanyaan yang sudah terjawab, sebelum data benar-benar disimpan.</p></div></li>
+          <li><span class="step-num">4</span><div class="step-body"><strong>Lanjutkan kapan saja</strong><p>Belum sempat isi semua? Tidak masalah — tekan Simpan dengan jawaban yang sudah ada, lalu lanjutkan isi sisanya kapan saja selama masih dalam bulan yang sama.</p></div></li>
+        </ol>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/33-puskesmas-kuesioner-lampiran.png" alt="Mengisi kuesioner dengan lampiran bukti" loading="lazy">
+          <figcaption>Kuesioner sedang diisi — jawaban Ya/Tidak dan lampiran bukti per pertanyaan.</figcaption>
+        </figure>
+
+        <div class="shot-row">
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/34-puskesmas-kuesioner-konfirmasi-simpan.png" alt="Konfirmasi simpan kuesioner" loading="lazy">
+            <figcaption>Konfirmasi sebelum menyimpan.</figcaption>
+          </figure>
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/35-puskesmas-kuesioner-tersimpan.png" alt="Kuesioner tersimpan" loading="lazy">
+            <figcaption>Tersimpan — waktu simpan tercatat di bawah tombol.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="doc-section" id="p-observasi">
+        <div class="section-kicker"><span class="role-tag puskesmas">Akun Puskesmas</span></div>
+        <h2 class="sec-title">Mengisi Observasi Sarana &amp; Prasarana</h2>
+        <p class="sec-lede">Lampiran 7 — 117 item pemeriksaan fisik sarana &amp; prasarana K3, dari proteksi kebakaran sampai manajemen fasilitas, mengacu pada instrumen Permenkes &amp; Akreditasi Puskesmas.</p>
+
+        <ol class="steps">
+          <li><span class="step-num">1</span><div class="step-body"><strong>Isi tanggal observasi</strong><p>Tanggal saat pemeriksaan fisik dilakukan, diisi sekali di atas form.</p></div></li>
+          <li><span class="step-num">2</span><div class="step-body"><strong>Tandai tiap item <span class="chip yes">Ada</span> atau <span class="chip no">Tidak Ada</span></strong><p>Kalau <span class="chip yes">Ada</span>, pilih juga kondisinya (Baik/Buruk, atau Baik/Rusak Ringan/Rusak Berat — tergantung jenis item) dan boleh tambahkan keterangan temuan.</p></div></li>
+          <li><span class="step-num">3</span><div class="step-body"><strong>Lampirkan foto bukti</strong><p>Sama seperti Kuesioner, tiap item bisa dilampiri foto kondisi sarana/prasarana sebagai bukti.</p></div></li>
+          <li><span class="step-num">4</span><div class="step-body"><strong>Simpan</strong><p>Konfirmasi muncul sebelum data tersimpan, sama seperti Kuesioner.</p></div></li>
+        </ol>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/37-puskesmas-observasi-mengisi.png" alt="Mengisi observasi sarana prasarana" loading="lazy">
+          <figcaption>Form Observasi — status Ada/Tidak Ada, kondisi, dan keterangan per item.</figcaption>
+        </figure>
+
+        <div class="callout warn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.3 3.38c-.87 1.5.22 3.37 1.95 3.37h14.7c1.73 0 2.81-1.87 1.95-3.37L13.95 3.38c-.87-1.5-3.03-1.5-3.9 0L2.7 16.13zM12 15.75h.007v.008H12v-.008z"/></svg>
+          <div>Item yang ditandai <span class="chip yes">Ada</span> <b>wajib</b> diisi kondisinya — sistem akan menolak simpan kalau ada yang terlewat.</div>
+        </div>
+      </section>
+
+      <section class="doc-section" id="p-riwayat">
+        <div class="section-kicker"><span class="role-tag puskesmas">Akun Puskesmas</span></div>
+        <h2 class="sec-title">Melihat Riwayat Pengisian</h2>
+        <p class="sec-lede">Puskesmas bisa melihat seluruh riwayat pengisian bulan-bulan sebelumnya kapan saja — hanya saja, data bulan yang sudah lewat tidak bisa diubah lagi, sifatnya baca-saja.</p>
+
+        <ol class="steps">
+          <li><span class="step-num">1</span><div class="step-body"><strong>Tekan "Lihat Riwayat"</strong><p>Tombol ini ada di pojok kanan atas halaman Kuesioner maupun Observasi.</p></div></li>
+          <li><span class="step-num">2</span><div class="step-body"><strong>Pilih periode yang ingin dilihat</strong><p>Daftar seluruh bulan yang pernah diisi akan muncul, diurutkan dari yang terbaru.</p></div></li>
+        </ol>
+
+        <div class="shot-row">
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/41-puskesmas-kuesioner-riwayat.png" alt="Daftar riwayat kuesioner" loading="lazy">
+            <figcaption>Daftar riwayat Kuesioner per bulan.</figcaption>
+          </figure>
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/42-puskesmas-kuesioner-riwayat-detail.png" alt="Detail riwayat kuesioner bulan lalu" loading="lazy">
+            <figcaption>Detail jawaban bulan lalu — mode baca saja.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="doc-section" id="p-lupa">
+        <div class="section-kicker"><span class="role-tag puskesmas">Akun Puskesmas</span></div>
+        <h2 class="sec-title">Lupa Password</h2>
+        <p class="sec-lede">Petugas Puskesmas tidak bisa mengganti password sendiri lewat aplikasi — ini memang sengaja dibatasi, hanya admin Dinas Kesehatan yang berwenang mengatur ulang password tiap akun Puskesmas.</p>
+        <p>Dari halaman login, klik tautan <b>"Lupa password? Hubungi admin via WhatsApp"</b>. Pesan akan otomatis terisi dan tinggal dikirim ke admin untuk diminta password baru.</p>
+      </section>
+
+      <!-- ========================= DINAS ========================= -->
+
+      <section class="doc-section" id="d-dashboard">
+        <div class="section-kicker"><span class="role-tag dinas">Akun Dinas Kesehatan</span></div>
+        <h2 class="sec-title">Dashboard</h2>
+        <p class="sec-lede">Ringkasan cepat kondisi seluruh Puskesmas Kota Pontianak untuk periode yang dipilih.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/10-dinas-dashboard.png" alt="Dashboard Dinas Kesehatan" loading="lazy">
+          <figcaption>Dashboard Dinas — total Puskesmas, status pengisian, dan ringkasan otomatis.</figcaption>
+        </figure>
+
+        <table class="ref">
+          <thead><tr><th>Bagian</th><th>Fungsi</th></tr></thead>
+          <tbody>
+            <tr><td>Filter periode</td><td>Pilih bulan &amp; tahun di kanan atas — seluruh halaman Dinas ikut mengikuti periode yang dipilih saat berpindah menu.</td></tr>
+            <tr><td>Status pengisian</td><td>Jumlah Puskesmas yang sudah/belum mengisi Kuesioner dan Observasi pada periode tersebut.</td></tr>
+            <tr><td>Ringkasan Otomatis</td><td>Cuplikan temuan paling penting (mis. banyak Puskesmas belum isi, atau kondisi sarana buruk) — klik untuk lihat rincian lengkap di halaman Rekap.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="doc-section" id="d-puskesmas">
+        <div class="section-kicker"><span class="role-tag dinas">Akun Dinas Kesehatan</span></div>
+        <h2 class="sec-title">Daftar &amp; Tambah Puskesmas</h2>
+        <p class="sec-lede">Menu "Daftar Puskesmas" menampilkan seluruh 23 Puskesmas Kota Pontianak beserta status pengisian dan skor K3 masing-masing.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/11-dinas-daftar-puskesmas.png" alt="Daftar Puskesmas" loading="lazy">
+          <figcaption>Daftar Puskesmas — status Kuesioner/Observasi dan badge Skor K3.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Menambahkan Puskesmas Baru</h3>
+        <p>Tekan tombol <b>"Tambah Puskesmas"</b> di pojok kanan atas, isi data Puskesmas (nama, alamat, kepala Puskesmas, kontak). Sistem otomatis membuatkan akun login untuk Puskesmas tersebut.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/12-dinas-tambah-puskesmas.png" alt="Form tambah Puskesmas" loading="lazy">
+          <figcaption>Form tambah Puskesmas baru.</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc-section" id="d-detail">
+        <div class="section-kicker"><span class="role-tag dinas">Akun Dinas Kesehatan</span></div>
+        <h2 class="sec-title">Detail Puskesmas &amp; Skor K3</h2>
+        <p class="sec-lede">Klik nama Puskesmas mana pun dari Daftar Puskesmas untuk melihat profil lengkap, tren skor K3 antar bulan, dan riwayat pengisian.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/13-dinas-detail-puskesmas.png" alt="Halaman detail Puskesmas" loading="lazy">
+          <figcaption>Profil Puskesmas, grafik tren skor K3, dan tabel riwayat pengisian per bulan.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Memahami Skor K3</h3>
+        <p>Skor dihitung otomatis: jumlah jawaban <span class="chip yes">Ya</span> (Kuesioner) ditambah <span class="chip yes">Ada</span> (Observasi), dibagi total item, dikali 100%.</p>
+
+        <table class="ref">
+          <thead><tr><th>Skor</th><th>Kategori</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 40%</td><td>Tidak Memenuhi</td></tr>
+            <tr><td>40–59%</td><td>Perlu Perbaikan Mayor</td></tr>
+            <tr><td>60–79%</td><td>Memenuhi Sebagian</td></tr>
+            <tr><td>80–89%</td><td>Memenuhi Standar</td></tr>
+            <tr><td>&ge; 90%</td><td>Unggul / Best Practice</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="sub-title">Mengubah Password Puskesmas</h3>
+        <p>Tekan tombol <b>"Ubah Password"</b> di halaman detail Puskesmas untuk membuatkan password baru — berguna saat petugas Puskesmas lupa password dan menghubungi lewat WhatsApp.</p>
+
+        <figure class="shot" style="max-width:420px">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/14-dinas-ubah-password-modal.png" alt="Modal ubah password Puskesmas" loading="lazy">
+          <figcaption>Form ubah password — password baru langsung ditampilkan untuk disampaikan ke Puskesmas.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Melihat Jawaban Satu Periode</h3>
+        <p>Klik salah satu baris pada tabel riwayat untuk melihat seluruh jawaban Kuesioner atau Observasi Puskesmas tersebut pada bulan itu, lengkap dengan lampiran buktinya.</p>
+
+        <div class="shot-row">
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/15-dinas-kuesioner-detail.png" alt="Detail jawaban kuesioner satu Puskesmas" loading="lazy">
+            <figcaption>Detail jawaban Kuesioner satu periode.</figcaption>
+          </figure>
+          <figure class="shot">
+            <div class="shot-bar"><span></span><span></span><span></span></div>
+            <img src="screenshots/16-dinas-observasi-detail.png" alt="Detail jawaban observasi satu Puskesmas" loading="lazy">
+            <figcaption>Detail jawaban Observasi, lengkap dengan kondisi tiap item.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="doc-section" id="d-rekap">
+        <div class="section-kicker"><span class="role-tag dinas">Akun Dinas Kesehatan</span></div>
+        <h2 class="sec-title">Rekap Jawaban Seluruh Puskesmas</h2>
+        <p class="sec-lede">Halaman paling lengkap untuk memantau kondisi K3 lintas Puskesmas sekaligus — rekap per pertanyaan, penilaian K3 agregat, dan rekomendasi tindak lanjut otomatis.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/17-dinas-rekap-overview.png" alt="Halaman Rekap Dinas" loading="lazy">
+          <figcaption>Halaman Rekap — ringkasan status, Penilaian K3 Puskesmas, dan Ringkasan &amp; Rekomendasi otomatis.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Siapa yang Belum Mengisi</h3>
+        <p>Tekan <b>"Lihat daftar"</b> pada kartu Kuesioner atau Observasi untuk melihat nama-nama Puskesmas yang belum mengisi periode tersebut.</p>
+
+        <figure class="shot" style="max-width:480px">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/18-dinas-rekap-belum-mengisi-modal.png" alt="Daftar Puskesmas belum mengisi" loading="lazy">
+          <figcaption>Daftar Puskesmas yang belum mengisi — klik nama untuk langsung ke detailnya.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Penilaian K3 Puskesmas (Agregat)</h3>
+        <p>Menampilkan rata-rata skor seluruh Puskesmas serta jumlah Puskesmas di tiap kategori. Klik salah satu badge kategori untuk melihat daftar nama Puskesmas di kategori tersebut, diurutkan dari skor tertinggi.</p>
+
+        <figure class="shot" style="max-width:480px">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/19-dinas-rekap-kategori-modal.png" alt="Daftar Puskesmas per kategori penilaian" loading="lazy">
+          <figcaption>Daftar Puskesmas pada satu kategori penilaian — warna header menyesuaikan kategorinya.</figcaption>
+        </figure>
+
+        <h3 class="sub-title">Rekap per Pertanyaan</h3>
+        <p>Tab <b>Kuesioner K3</b> dan <b>Observasi Sarana Prasarana</b> menampilkan setiap pertanyaan/item beserta proporsi jawabannya di seluruh Puskesmas. Klik <b>"Lihat per puskesmas"</b> pada pertanyaan mana pun untuk melihat Puskesmas mana saja yang menjawab <span class="chip yes">Ya</span>, <span class="chip no">Tidak</span>, atau belum menjawab sama sekali — lengkap dengan lampiran buktinya.</p>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/20-dinas-rekap-detail-jawaban-modal.png" alt="Detail jawaban per puskesmas untuk satu pertanyaan" loading="lazy">
+          <figcaption>Breakdown jawaban satu pertanyaan per Puskesmas, lengkap dengan lampiran bukti.</figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="shot-bar"><span></span><span></span><span></span></div>
+          <img src="screenshots/21-dinas-rekap-observasi-tab.png" alt="Tab Observasi pada halaman Rekap" loading="lazy">
+          <figcaption>Tab Observasi — proporsi Ada/Tidak Ada dan kondisi tiap item di seluruh Puskesmas.</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc-section" id="d-hapus">
+        <div class="section-kicker"><span class="role-tag dinas">Akun Dinas Kesehatan</span></div>
+        <h2 class="sec-title">Mengelola &amp; Menghapus Data</h2>
+        <p class="sec-lede">Admin Dinas Kesehatan bisa menghapus data pengisian Kuesioner atau Observasi suatu Puskesmas untuk periode tertentu — misalnya saat data dimasukkan keliru dan perlu diisi ulang dari awal.</p>
+
+        <ol class="steps">
+          <li><span class="step-num">1</span><div class="step-body"><strong>Buka halaman Detail Puskesmas</strong><p>Cari baris periode yang datanya ingin dihapus pada tabel "Riwayat Pengisian &amp; Penilaian K3".</p></div></li>
+          <li><span class="step-num">2</span><div class="step-body"><strong>Tekan ikon tempat sampah</strong><p>Terletak di samping link "X jawaban"/"X item" pada kolom Kuesioner atau Observasi.</p></div></li>
+          <li><span class="step-num">3</span><div class="step-body"><strong>Konfirmasi penghapusan</strong><p>Sistem akan meminta konfirmasi karena tindakan ini <b>permanen</b> — seluruh jawaban dan lampiran bukti periode tersebut ikut terhapus.</p></div></li>
+        </ol>
+
+        <div class="callout warn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.3 3.38c-.87 1.5.22 3.37 1.95 3.37h14.7c1.73 0 2.81-1.87 1.95-3.37L13.95 3.38c-.87-1.5-3.03-1.5-3.9 0L2.7 16.13zM12 15.75h.007v.008H12v-.008z"/></svg>
+          <div>Penghapusan ini <b>tidak bisa dibatalkan</b>. Gunakan hanya untuk kasus salah input yang perlu diisi ulang, bukan untuk membatalkan pengisian sementara.</div>
+        </div>
+      </section>
+
+      <section class="doc-section" id="faq">
+        <h2 class="sec-title">Pertanyaan Umum</h2>
+        <p class="sec-lede">Hal-hal yang sering ditanyakan tentang penggunaan sistem ini.</p>
+
+        <details class="faq">
+          <summary>Kenapa saya tidak bisa mengubah jawaban bulan lalu?</summary>
+          <p>Pengisian Kuesioner dan Observasi hanya bisa diubah selama masih berada di bulan berjalan. Begitu bulan berganti, data bulan sebelumnya otomatis terkunci dan hanya bisa dilihat (baca-saja) oleh akun Puskesmas. Admin Dinas Kesehatan tetap bisa menghapus data periode mana pun bila diperlukan.</p>
+        </details>
+        <details class="faq">
+          <summary>Apakah pengisian bisa ditunda dan dilanjutkan nanti?</summary>
+          <p>Bisa. Tekan "Simpan" kapan saja walau belum semua pertanyaan terjawab, lalu lanjutkan mengisi sisanya di kesempatan lain — selama masih dalam bulan yang sama.</p>
+        </details>
+        <details class="faq">
+          <summary>Berapa banyak file yang bisa dilampirkan per pertanyaan?</summary>
+          <p>Hingga 5 file sekaligus per unggahan, masing-masing maksimal 5MB. Format yang didukung: gambar (JPG, PNG, WEBP), PDF, dan dokumen Office (DOC, DOCX, XLS, XLSX).</p>
+        </details>
+        <details class="faq">
+          <summary>Apakah skor K3 memperhitungkan kondisi "Rusak"?</summary>
+          <p>Tidak. Skor hanya menghitung ketersediaan (Ya/Ada vs Tidak/Tidak Ada). Kondisi rusak tetap dicatat dan ditampilkan terpisah di halaman Rekap untuk bahan tindak lanjut Dinas Kesehatan, tapi tidak mengurangi skor.</p>
+        </details>
+        <details class="faq">
+          <summary>Siapa yang bisa mengganti password akun Puskesmas?</summary>
+          <p>Hanya admin Dinas Kesehatan, lewat halaman Detail Puskesmas &rarr; tombol "Ubah Password". Petugas Puskesmas yang lupa password cukup menghubungi admin lewat tautan WhatsApp di halaman login.</p>
+        </details>
+      </section>
+
+    </div>
+
+    <footer class="doc-footer">
+      Monitoring K3 Puskesmas Kota Pontianak — Dinas Kesehatan &amp; Puskesmas Kota Pontianak.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var btn = document.getElementById('menuBtn');
+  var sidebar = document.getElementById('sidebar');
+  btn && btn.addEventListener('click', function(){
+    var open = sidebar.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  sidebar && sidebar.addEventListener('click', function(e){
+    if (e.target.tagName === 'A' && window.matchMedia('(max-width:880px)').matches) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  try {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.sidebar a[href^="#"]'));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          links.forEach(function(a){ a.classList.remove('active'); });
+          var match = links.find(function(a){ return a.getAttribute('href') === '#' + entry.target.id; });
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  } catch (e) {}
+})();
+</script>
+
+</body></html>

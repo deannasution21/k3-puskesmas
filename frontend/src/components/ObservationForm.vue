@@ -27,7 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: Record<number, ObservationAnswer>]
-  'attachment-uploaded': [itemId: number, attachments: Attachment[]]
+  'attachment-added': [itemId: number, attachments: Attachment[]]
   'attachment-deleted': [itemId: number, attachmentId: number]
 }>()
 
@@ -127,7 +127,7 @@ function setAda(item: Item, ada: 'ada' | 'tidak_ada') {
             :item-id="item.id"
             :attachments="attachments?.[item.id] ?? []"
             :readonly="readonly"
-            @uploaded="(id, a) => emit('attachment-uploaded', id, a)"
+            @attached="(id, a) => emit('attachment-added', id, a)"
             @deleted="(id, a) => emit('attachment-deleted', id, a)"
           />
         </li>

@@ -50,7 +50,7 @@ async function load() {
   loading.value = false
 }
 
-function onAttachmentUploaded(itemId: number, newAttachments: Attachment[]) {
+function onAttachmentAdded(itemId: number, newAttachments: Attachment[]) {
   attachmentsByItem.value = {
     ...attachmentsByItem.value,
     [itemId]: [...(attachmentsByItem.value[itemId] ?? []), ...newAttachments],
@@ -167,7 +167,7 @@ onMounted(load)
         :items="items"
         v-model="answers"
         :attachments="attachmentsByItem"
-        @attachment-uploaded="onAttachmentUploaded"
+        @attachment-added="onAttachmentAdded"
         @attachment-deleted="onAttachmentDeleted"
       />
 

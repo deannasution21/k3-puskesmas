@@ -140,6 +140,116 @@ class ObservationController extends Controller
         return response()->json($attachments->values());
     }
 
+    public function reusableAttachments(Request $request, ObservationItem $item)
+    {
+        $user = $request->user();
+        $bulan = Periode::bulanSekarang();
+        $tahun = Periode::tahunSekarang();
+        $currentSubmissionId = ObservationSubmission::where('puskesmas_id', $user->puskesmas_id)
+            ->where('periode_bulan', $bulan)
+            ->where('periode_tahun', $tahun)
+            ->value('id');
+        $alreadyReusedIds = $currentSubmissionId
+            ? ObservationAnswerAttachment::where('submission_id', $currentSubmissionId)
+                ->where('item_id', $item->id)
+                ->whereNotNull('reused_from_attachment_id')
+                ->pluck('reused_from_attachment_id')
+            : collect();
+
+        $attachments = ObservationAnswerAttachment::with('submission:id,periode_bulan,periode_tahun')
+            ->where('item_id', $item->id)
+            ->when($alreadyReusedIds->isNotEmpty(), fn ($query) => $query->whereNotIn('id', $alreadyReusedIds))
+            ->whereHas('submission', function ($query) use ($user, $bulan, $tahun) {
+                $query->where('puskesmas_id', $user->puskesmas_id)
+                    ->where(function ($query) use ($bulan, $tahun) {
+                        $query->where('periode_tahun', '<', $tahun)
+                            ->orWhere(function ($query) use ($bulan, $tahun) {
+                                $query->where('periode_tahun', $tahun)
+                                    ->where('periode_bulan', '<', $bulan);
+                            });
+                    });
+            })
+            ->orderByDesc('id')
+            ->get()
+            ->filter(fn (ObservationAnswerAttachment $attachment) => Storage::disk('local')->exists($attachment->path))
+            ->values()
+            ->map(fn (ObservationAnswerAttachment $attachment) => [
+                'id' => $attachment->id,
+                'item_id' => $attachment->item_id,
+                'original_name' => $attachment->original_name,
+                'mime_type' => $attachment->mime_type,
+                'size' => $attachment->size,
+                'created_at' => $attachment->created_at,
+                'periode_bulan' => $attachment->submission->periode_bulan,
+                'periode_tahun' => $attachment->submission->periode_tahun,
+            ]);
+
+        return response()->json($attachments);
+    }
+
+    public function reuseAttachment(Request $request, ObservationItem $item)
+    {
+        $validated = $request->validate([
+            'attachment_id' => ['required', 'integer'],
+            'confirmed' => ['required', 'accepted'],
+        ]);
+
+        $user = $request->user();
+        $bulan = Periode::bulanSekarang();
+        $tahun = Periode::tahunSekarang();
+
+        $source = ObservationAnswerAttachment::with('submission')
+            ->whereKey($validated['attachment_id'])
+            ->where('item_id', $item->id)
+            ->whereHas('submission', function ($query) use ($user, $bulan, $tahun) {
+                $query->where('puskesmas_id', $user->puskesmas_id)
+                    ->where(function ($query) use ($bulan, $tahun) {
+                        $query->where('periode_tahun', '<', $tahun)
+                            ->orWhere(function ($query) use ($bulan, $tahun) {
+                                $query->where('periode_tahun', $tahun)
+                                    ->where('periode_bulan', '<', $bulan);
+                            });
+                    });
+            })
+            ->firstOrFail();
+
+        abort_unless(Storage::disk('local')->exists($source->path), 404, 'Berkas sumber tidak tersedia.');
+
+        $submission = ObservationSubmission::firstOrCreate(
+            [
+                'puskesmas_id' => $user->puskesmas_id,
+                'periode_bulan' => $bulan,
+                'periode_tahun' => $tahun,
+            ],
+            ['user_id' => $user->id],
+        );
+
+        $existingReuse = $submission->attachments()
+            ->where('item_id', $item->id)
+            ->where('reused_from_attachment_id', $source->id)
+            ->exists();
+
+        if ($existingReuse) {
+            return response()->json(['message' => 'Referensi tersebut sudah ditambahkan pada periode ini.'], 409);
+        }
+
+        $attachment = $submission->attachments()->create([
+            'item_id' => $item->id,
+            'uploaded_by' => $user->id,
+            'original_name' => $source->original_name,
+            'path' => $source->path,
+            'mime_type' => $source->mime_type,
+            'size' => $source->size,
+            'reused_from_attachment_id' => $source->id,
+            'reused_from_periode_bulan' => $source->submission->periode_bulan,
+            'reused_from_periode_tahun' => $source->submission->periode_tahun,
+            'reuse_confirmed_by' => $user->id,
+            'reuse_confirmed_at' => now(),
+        ]);
+
+        return response()->json($attachment, 201);
+    }
+
     public function destroyAttachment(Request $request, ObservationAnswerAttachment $attachment)
     {
         $user = $request->user();
@@ -152,8 +262,12 @@ class ObservationController extends Controller
             'Lampiran periode lalu tidak dapat dihapus.',
         );
 
-        Storage::disk('local')->delete($attachment->path);
+        $path = $attachment->path;
         $attachment->delete();
+
+        if (! ObservationAnswerAttachment::where('path', $path)->exists()) {
+            Storage::disk('local')->delete($path);
+        }
 
         return response()->json(['message' => 'Lampiran dihapus.']);
     }
